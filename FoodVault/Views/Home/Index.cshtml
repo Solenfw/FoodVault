@@ -1,6 +1,36 @@
-﻿@{
+﻿
+@{
     ViewData["Title"] = "Home Page";
     Layout = "~/Views/Shared/FootVaultLayout.cshtml";
 }
+@model IEnumerable<FoodVault.Models.Entities.Recipe>
 
+@{
+    ViewData["Title"] = "Recipes";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="m-0">All Recipes</h2>
+        <div>
+            <a class="btn btn-outline-primary" href="/Recipes/Create">Create recipe</a>
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">No recipes found.</div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var recipe in Model)
+            {
+                <div class="col">
+                    @await Html.PartialAsync("_RecipeCardPartial", recipe)
+                </div>
+            }
+        </div>
+    }
+</div>
 

@@ -234,9 +234,13 @@ public partial class FoodVaultDbContext : IdentityDbContext<User>
         });
 
         modelBuilder.Entity<Recipe>(entity =>
-        {
+        {  
+            entity.Property(e => e.ThumbnailUrl)
+                  .HasMaxLength(1000)        
+                  .HasColumnName("thumbnail_url")
+                  .IsUnicode(false)          
+                  .IsRequired(false);
             entity.HasKey(e => e.Id).HasName("PK__recipes__3213E83F00A6AF5E");
-
             entity.ToTable("recipes");
 
             entity.HasIndex(e => e.UserId, "IX_recipes_user_id");
