@@ -1,7 +1,9 @@
+
+using FoodVault.Models.Data;
+using FoodVault.ViewComponents;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using FoodVault.Data;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,18 +13,15 @@ builder.Services.AddControllersWithViews();
 
 
 // adding Db context
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<FoodVault.Data.FoodVaultDbContext>(options =>
-    options.UseSqlServer(connectionString));
-
+builder.Services.AddDbContext<FoodVaultDbContext>(options=>     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'FoodVaultContext' not found.")));
 
 // add Identity services
 builder.Services.AddDefaultIdentity<FoodVault.Models.User>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddEntityFrameworkStores<FoodVault.Data.FoodVaultDbContext>();
-
+    .AddEntityFrameworkStores<FoodVaultDbContext>();
+builder.Services.AddScoped<SearchBarViewComponent>();
 // add services to the container
 builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages(); 
+builder.Services.AddRazorPages();
 
 var app = builder.Build();
 

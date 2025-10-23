@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FoodVault.Models.Data.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace FoodVault.Models.Entities;

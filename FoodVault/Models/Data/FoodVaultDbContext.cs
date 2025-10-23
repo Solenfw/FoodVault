@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using FoodVault.Models.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore; // THÊM DÒNG NÀY
+using Microsoft.AspNetCore.Identity; // THÊM DÒNG NÀY
 using Microsoft.EntityFrameworkCore;
-
+using FoodVault.Models.Data.Entities;
 namespace FoodVault.Models.Data;
 
-public partial class FoodVaultDbContext : DbContext
+public partial class FoodVaultDbContext : IdentityDbContext<User>
 {
     public FoodVaultDbContext()
     {
@@ -38,7 +40,6 @@ public partial class FoodVaultDbContext : DbContext
 
     public virtual DbSet<Tag> Tags { get; set; }
 
-    public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -46,6 +47,8 @@ public partial class FoodVaultDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Favorite>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__favorite__3213E83F15A400B3");
@@ -377,45 +380,70 @@ public partial class FoodVaultDbContext : DbContext
                 .HasColumnName("name");
         });
 
-        modelBuilder.Entity<User>(entity =>
+        modelBuilder.Entity<User>(b =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__users__3213E83FA0383695");
+            b.ToTable("users");
 
-            entity.ToTable("users");
-
-            entity.HasIndex(e => e.PasswordHash, "UQ__users__6F0B18C3108071BD").IsUnique();
-
-            entity.HasIndex(e => e.Name, "UQ__users__72E12F1B7DEFB9E6").IsUnique();
-
-            entity.Property(e => e.Id)
+            // Map các cột theo đúng database
+            b.Property(u => u.Id)
                 .HasMaxLength(50)
                 .HasColumnName("id");
-            entity.Property(e => e.ActivityHistory).HasColumnName("activity_history");
-            entity.Property(e => e.AvatarUrl)
-                .HasMaxLength(500)
-                .HasColumnName("avatar_url");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnName("created_at");
-            entity.Property(e => e.DietaryPreferences)
-                .HasMaxLength(500)
-                .HasColumnName("dietary_preferences");
-            entity.Property(e => e.DietaryRestrictions)
-                .HasMaxLength(500)
-                .HasColumnName("dietary_restrictions");
-            entity.Property(e => e.Email)
-                .HasMaxLength(255)
-                .HasColumnName("email");
-            entity.Property(e => e.Name)
+
+            b.Property(u => u.Name)
                 .HasMaxLength(100)
                 .HasColumnName("name");
-            entity.Property(e => e.PasswordHash)
+
+            b.Property(u => u.Email)
+                .HasMaxLength(255)
+                .HasColumnName("email");
+
+            b.Property(u => u.NormalizedEmail)
+                .HasMaxLength(255)
+                .HasColumnName("normalized_email");
+
+          
+            b.Property(u => u.NormalizedUserName)
+                .HasMaxLength(100)
+                .HasColumnName("normalized_name");
+
+            b.Property(u => u.PasswordHash)
                 .HasMaxLength(255)
                 .HasColumnName("password_hash");
-            entity.Property(e => e.Role)
+
+            b.Property(u => u.AvatarUrl)
+                .HasMaxLength(500)
+                .HasColumnName("avatar_url");
+
+            b.Property(u => u.DietaryPreferences)
+                .HasMaxLength(500)
+                .HasColumnName("dietary_preferences"); // Sửa thành dietary_preferences
+
+            b.Property(u => u.DietaryRestrictions)
+                .HasMaxLength(500)
+                .HasColumnName("dietary_restrictions"); // Sửa thành dietary_restrictions
+
+            b.Property(u => u.ActivityHistory)
+                .HasColumnName("activity_history");
+
+            b.Property(u => u.Role)
                 .HasMaxLength(20)
                 .HasDefaultValue("user")
                 .HasColumnName("role");
+
+            b.Property(u => u.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnName("created_at");
+
+          
+
+            // Cấu hình indexes từ database
+            b.HasIndex(u => u.PasswordHash)
+                .HasDatabaseName("UQ__users__6F0B1C3108071BD")
+                .IsUnique();
+
+            b.HasIndex(u => u.Name)
+                .HasDatabaseName("UQ__users__72E12F1B7DEFB9E6")
+                .IsUnique();
         });
 
         OnModelCreatingPartial(modelBuilder);

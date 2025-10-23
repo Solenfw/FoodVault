@@ -1,0 +1,26 @@
+﻿@model List<string>
+
+<div class="search-bar-component">
+    <div class="search-container">
+        <!-- Search Box -->
+        <div class="search-box">
+            <input type="text" placeholder="Search recipes, ingredients..." class="search-input">
+            <button class="search-btn">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+        <!-- Popular Tags -->
+        @if (Model != null && Model.Any())
+        {
+            <div class="popular-tags">
+                <span class="tags-label">Popular tags:</span>
+                <div class="tags-container">
+                    @foreach (var tag in Model)
+                    {
+                        <span class="tag-badge" data-tag="@tag">@tag</span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,7 +1,8 @@
-﻿using System;
+﻿using FoodVault.Models.Entities;
+using System;
 using System.Collections.Generic;
 
-namespace FoodVault.Models.Entities;
+namespace FoodVault.Models.Data.Entities;
 
 public partial class Tag
 {
