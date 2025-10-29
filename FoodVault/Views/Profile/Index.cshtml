@@ -1,0 +1,49 @@
+﻿@model FoodVault.Models.User
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-3">
+        @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+        {
+            <img src="@Model.ProfilePictureUrl" alt="User Avatar" class="img-fluid rounded-circle" />
+        }
+        else
+        {
+            // Display a default profile
+            <img src="/images/default-profile.jpg" alt="Default User Avatar" class="img-fluid rounded-circle" />
+        }
+    </div>
+    <div class="col-md-9">
+        <h4>Profile Information</h4>
+            <hr />
+            <dl class="row">
+                <dt class="col-sm-2">
+                    Username
+                </dt>
+                <dd class="col-sm-10">
+                    @Model.UserName
+                </dd>
+                <dt class="col-sm-2">
+                    First Name
+                </dt>
+                <dd class="col-sm-10">
+                    @Model.FirstName
+                </dd>
+                <dt class="col-sm-2">
+                    Last Name
+                </dt>
+                <dd class="col-sm-10">
+                    @Model.LastName
+                </dd>
+            </dl>
+        <div>
+            <a asp-action="Edit" class="btn btn-primary">Edit Profile</a>
+        </div>
+    </div>
+</div>

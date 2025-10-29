@@ -1,28 +1,43 @@
+<<<<<<< HEAD
+using FoodVault.Data;
+using FoodVault.Services;
+=======
+
+using FoodVault.Models.Data;
+using FoodVault.ViewComponents;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
+>>>>>>> origin/develop
 using Microsoft.EntityFrameworkCore;
-using FoodVault.Data;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-
-
 // adding Db context
+<<<<<<< HEAD
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<FoodVault.Data.FoodVaultDbContext>(options =>
+builder.Services.AddDbContext<FoodVaultDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+=======
+builder.Services.AddDbContext<FoodVaultDbContext>(options=>     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'FoodVaultContext' not found.")));
+>>>>>>> origin/develop
 
 // add Identity services
 builder.Services.AddDefaultIdentity<FoodVault.Models.User>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddEntityFrameworkStores<FoodVault.Data.FoodVaultDbContext>();
+    .AddEntityFrameworkStores<FoodVaultDbContext>();
+<<<<<<< HEAD
 
 // add services to the container
 builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages(); 
+builder.Services.AddRazorPages();
+builder.Services.AddScoped<FileUploadService>();
+=======
+builder.Services.AddScoped<SearchBarViewComponent>();
+// add services to the container
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+>>>>>>> origin/develop
 
 var app = builder.Build();
 

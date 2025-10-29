@@ -1,7 +1,6 @@
 # =====================
 # ASP.NET / .NET Core
 # =====================
-
 # Build directories
 bin/
 obj/
@@ -15,8 +14,8 @@ publish/
 
 # Visual Studio / Rider / IDE
 .vs/
-*.idea/
-*.vscode/
+.idea/
+.vscode/
 *.log
 
 # OS files
@@ -26,11 +25,8 @@ Thumbs.db
 # =====================
 # Entity Framework / Migrations
 # =====================
-Migrations/
-*.Snapshot.cs
-
-# Seed files (optional: if you want to ignore local JSON seeds)
-# seed.json
+# DO NOT IGNORE Migrations/ - team needs these files!
+# Only ignore if you use a specific naming pattern for local test migrations
 
 # =====================
 # Node / frontend (if using npm for libs)
@@ -44,7 +40,18 @@ dist/
 wwwroot/uploads/
 
 # =====================
-# Environment / config
+# Environment / config (UPDATED)
 # =====================
 .env
-appsettings.*.json    # ignore sensitive env-specific settings
+# Only ignore LOCAL config files, not Development/Production
+appsettings.local.json
+appsettings.*.local.json
+# User secrets are stored outside the project, but just in case:
+secrets.json
+
+# =====================
+# Database files (if using SQLite locally)
+# =====================
+*.db
+*.db-shm
+*.db-wal
