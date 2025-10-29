@@ -55,7 +55,7 @@ namespace FoodVault.Controllers
             if (viewModel.ProfilePicture != null)
             {
                 // Use the service to save the file
-                string filePath = await _fileUploadService.UploadFileAsync(viewModel.ProfilePicture, "profilepictures");
+                string filePath = await _fileUploadService.UploadFileAsync(viewModel.ProfilePicture, "profile_pics");
 
                 // Save the returned path to the user
                 user.ProfilePictureUrl = filePath;
