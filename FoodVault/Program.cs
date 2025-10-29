@@ -1,28 +1,24 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using FoodVault.Data;
+using FoodVault.Services;
+using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-
-
 // adding Db context
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<FoodVault.Data.FoodVaultDbContext>(options =>
+builder.Services.AddDbContext<FoodVaultDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 
 // add Identity services
 builder.Services.AddDefaultIdentity<FoodVault.Models.User>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddEntityFrameworkStores<FoodVault.Data.FoodVaultDbContext>();
+    .AddEntityFrameworkStores<FoodVaultDbContext>();
 
 // add services to the container
 builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages(); 
+builder.Services.AddRazorPages();
+builder.Services.AddScoped<FileUploadService>();
 
 var app = builder.Build();
 

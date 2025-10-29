@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using FoodVault.Models;
+using FoodVault.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FoodVault.Controllers
