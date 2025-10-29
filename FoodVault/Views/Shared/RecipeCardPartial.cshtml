@@ -1,0 +1,50 @@
+﻿@model FoodVault.Models.Entities.Recipe
+@using System.Globalization
+
+<div class="card h-100 shadow-sm">
+    <!-- If you have an image URL property (e.g., ThumbnailUrl or ImageUrl), replace the placeholder below -->
+    <img src="@(Model.ThumbnailUrl ?? Url.Content("~/images/image1.jpeg"))" class="card-img-top" alt="@Model.Title" style="object-fit:cover; height:180px;" />
+
+    <div class="card-body d-flex flex-column">
+        <h5 class="card-title">@Model.Title</h5>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <p class="card-text text-muted mb-2">@(
+                Model.Description.Length > 140 ? Model.Description.Substring(0, 140) + "…" : Model.Description
+            )</p>
+        }
+
+        <div class="mt-auto d-flex justify-content-between align-items-center">
+            <div>
+                @* Average rating (if Ratings loaded) *@
+                @{
+                    double avg = 0;
+                    int count = 0;
+                    if (Model.Ratings != null && Model.Ratings.Any())
+                    {
+                        count = Model.Ratings.Count();
+                        avg = Model.Ratings.Average(r => (double)r.Rating1);
+                    }
+                }
+                @if (count > 0)
+                {
+                    <small class="text-warning fw-bold">
+                        @String.Format(CultureInfo.InvariantCulture, "{0:0.0}", avg) <i class="fa fa-star"></i>
+                    </small>
+                    <small class="text-muted ms-2">(@count)</small>
+                }
+                else
+                {
+                    <small class="text-muted">No ratings</small>
+                }
+            </div>
+
+            <div>
+                <a href="@Url.Action("Details", "Recipes", new { id = Model.Id })" class="btn btn-sm btn-outline-primary me-2">View</a>
+                @* Optionally use a Favorite button viewcomponent if implemented *@
+                @* Example: @await Component.InvokeAsync("FavoriteButton", new { recipeId = Model.Id }) *@
+            </div>
+        </div>
+    </div>
+</div>

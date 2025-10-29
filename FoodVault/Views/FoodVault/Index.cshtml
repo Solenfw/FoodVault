@@ -1,6 +1,4 @@
-﻿
-@{
-    ViewData["Title"] = "Home Page";
+﻿@{
     Layout = "~/Views/Shared/FootVaultLayout.cshtml";
 }
 @model IEnumerable<FoodVault.Models.Entities.Recipe>
@@ -27,10 +25,9 @@
             @foreach (var recipe in Model)
             {
                 <div class="col">
-                    @await Html.PartialAsync("_RecipeCardPartial", recipe)
+                    @await Html.PartialAsync("RecipeCardPartial", recipe)
                 </div>
             }
         </div>
     }
 </div>
-
