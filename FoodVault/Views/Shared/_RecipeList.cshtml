@@ -1,0 +1,25 @@
+@model IEnumerable<FoodVault.Models.ViewModels.RecipeListItemViewModel>
+
+<div class="list-group">
+@foreach (var r in Model)
+{
+    <a class="list-group-item list-group-item-action" asp-controller="Recipe" asp-action="Details" asp-route-id="@r.Id">
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">@r.Title</h5>
+            <small>@(r.UpdatedAt?.ToLocalTime().ToString("g"))</small>
+        </div>
+        <p class="mb-1">@r.Description</p>
+    </a>
+}
+</div>
+
+
+
+
+
+
+
+
+
+
+

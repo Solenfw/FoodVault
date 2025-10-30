@@ -1,22 +1,95 @@
-html {
-  font-size: 14px;
+/* Layout spacing tweaks */
+main.container { min-height: 70vh; }
+
+/* Card utilities */
+.object-fit-cover { object-fit: cover; }
+
+/* Toast container is placed by layout */
+.footer {
+    background: linear-gradient(90deg, #ffefba 0%, #ffffff 100%);
+    color: #500F5B;
+    padding: 40px 0 0 0;
+    border-top: 4px solid #ff8a00;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+.footer__widget__social a {
+    display: inline-block;
+    margin-right: 12px;
+    font-size: 1.4em;
+    color: #ff8a00;
+    background: #ffe9c4;
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    text-align: center;
+    line-height: 36px;
+    transition: background 0.3s, color 0.3s, transform 0.2s;
+}
+.footer__widget input[type="text"] {
+    border-radius: 8px;
+    border: 1.5px solid #ff8a00;
+    padding: 8px 12px;
+    width: 190px;
+    transition: box-shadow 0.3s;
+    outline: none;
+}
+.footer__widget input[type="text"]:focus {
+    box-shadow: 0 3px 18px 0 rgba(255, 211, 72, 0.25);
+    border-color: #FFB100;
+}
+.footer__widget__social a:hover {
+    background: #ff8a00;
+    color: #fff;
+    transform: scale(1.13) rotate(-5deg);
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+.site-btn {
+    background: linear-gradient(to right, #ff8a00, #ffce44);
+    border: none;
+    color: #fff;
+    font-weight: 500;
+    padding: 8px 28px;
+    border-radius: 20px;
+    box-shadow: 0 6px 18px -6px #ff8a00b3;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.18s;
+}
+.site-btn:hover {
+    background: linear-gradient(to left, #ffb100 40%, #ff8a00 100%);
+    color: #fffbe0;
+    transform: scale(1.06);
+}
+.navbar {
+    box-shadow: 0 2px 16px 0 rgba(255,138,0,.07), 0 1.5px 2px #ffe7d1;
+    background: linear-gradient(90deg, #fffbe9 60%, #fff8f1 100%);
+}
+.navbar-nav .nav-link {
+    color: #795548;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: color 0.2s, background 0.2s, border-radius 0.17s;
+    border-radius: 5px;
+    padding: 7px 13px;
+    margin: 2px 5px;
+    position: relative;
+}
+.navbar-nav .nav-link.active, 
+.navbar-nav .nav-link:focus, 
+.navbar-nav .nav-link:hover {
+    color: #fff;
+    background: #ff9800;
+    border-radius: 7px;
+    outline: none;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.navbar .btn, .navbar .site-btn {
+    margin-left: 6px;
 }
-
-html {
-  position: relative;
-  min-height: 100%;
+.navbar form input[type="search"] {
+    border-radius: 10px !important;
+    border: 1.5px solid #ffb100;
+    transition: box-shadow 0.28s, border-color 0.22s;
 }
-
-body {
-  margin-bottom: 60px;
+.navbar form input[type="search"]:focus {
+    box-shadow: 0 2px 12px 0 rgba(255,182,87,0.16);
+    border-color: #ff9800;
 }

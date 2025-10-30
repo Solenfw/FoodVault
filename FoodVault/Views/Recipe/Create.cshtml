@@ -1,0 +1,111 @@
+@model FoodVault.Models.ViewModels.CreateRecipeViewModel
+@{
+    ViewData["Title"] = "Create Recipe";
+}
+<partial name="~/Views/Shared/_Messages.cshtml" />
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Ảnh đại diện món ăn (nếu có)</label>
+        <input type="file" name="Image" accept="image/*" class="form-control" />
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="Servings" class="form-label"></label>
+            <input asp-for="Servings" class="form-control" />
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="PrepTimeMinutes" class="form-label"></label>
+            <input asp-for="PrepTimeMinutes" class="form-control" />
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="CookTimeMinutes" class="form-label"></label>
+            <input asp-for="CookTimeMinutes" class="form-control" />
+        </div>
+    </div>
+    <h5 class="mt-4">Nguyên liệu</h5>
+    <table class="table table-bordered w-auto">
+        <thead><tr><th>Tên nguyên liệu</th><th>Số lượng</th><th>Đơn vị</th><th></th></tr></thead>
+        <tbody id="ingredients-body">
+        </tbody>
+    </table>
+    <div class="mb-3 d-flex gap-2">
+        <input id="ingredient-name" class="form-control form-control-sm w-auto" placeholder="Tên nguyên liệu" />
+        <input id="ingredient-qty" type="number" step="any" class="form-control form-control-sm w-auto" placeholder="Số lượng" />
+        <input id="ingredient-unit" class="form-control form-control-sm w-auto" placeholder="Đơn vị" />
+        <button type="button" class="btn btn-sm btn-primary" onclick="addIngredient()">Thêm nguyên liệu</button>
+    </div>
+    <input type="hidden" name="IngredientsJson" id="IngredientsJson" />
+    <h5 class="mt-4">Các bước thực hiện</h5>
+    <table class="table table-bordered w-auto">
+        <thead><tr><th>Bước</th><th>Hướng dẫn</th><th></th></tr></thead>
+        <tbody id="steps-body">
+        </tbody>
+    </table>
+    <div class="mb-3 d-flex gap-2">
+        <input id="step-number" type="number" min="1" class="form-control form-control-sm w-auto" placeholder="Số bước" />
+        <input id="step-instruction" class="form-control form-control-sm w-auto" placeholder="Nội dung bước" />
+        <button type="button" class="btn btn-sm btn-primary" onclick="addStep()">Thêm bước</button>
+    </div>
+    <input type="hidden" name="StepsJson" id="StepsJson" />
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        let ingredients = [];
+        let steps = [];
+        function redrawIngredients() {
+            let tbody = document.getElementById('ingredients-body');
+            tbody.innerHTML = ingredients.map((ing, idx) => `<tr><td>${ing.name}</td><td>${ing.qty}</td><td>${ing.unit}</td><td><button type='button' class='btn btn-sm btn-link text-danger' onclick='removeIngredient(${idx})'>X</button></td></tr>`).join('');
+            document.getElementById('IngredientsJson').value = JSON.stringify(ingredients);
+        }
+        function addIngredient() {
+            let name = document.getElementById('ingredient-name').value;
+            let qty = document.getElementById('ingredient-qty').value;
+            let unit = document.getElementById('ingredient-unit').value;
+            if (!name || !qty) return;
+            ingredients.push({ name: name, qty: qty, unit: unit });
+            redrawIngredients();
+            document.getElementById('ingredient-name').value = '';
+            document.getElementById('ingredient-qty').value = '';
+            document.getElementById('ingredient-unit').value = '';
+        }
+        function removeIngredient(idx) { ingredients.splice(idx, 1); redrawIngredients(); }
+        function redrawSteps() {
+            let tbody = document.getElementById('steps-body');
+            tbody.innerHTML = steps.map((step, idx) => `<tr><td>${step.number}</td><td>${step.inst}</td><td><button type='button' class='btn btn-sm btn-link text-danger' onclick='removeStep(${idx})'>X</button></td></tr>`).join('');
+            document.getElementById('StepsJson').value = JSON.stringify(steps);
+        }
+        function addStep() {
+            let number = document.getElementById('step-number').value;
+            let inst = document.getElementById('step-instruction').value;
+            if (!number || !inst) return;
+            steps.push({ number: number, inst: inst });
+            redrawSteps();
+            document.getElementById('step-number').value = '';
+            document.getElementById('step-instruction').value = '';
+        }
+        function removeStep(idx) { steps.splice(idx, 1); redrawSteps(); }
+    </script>
+}
+
+
+
+
+
+
+
+
+
+

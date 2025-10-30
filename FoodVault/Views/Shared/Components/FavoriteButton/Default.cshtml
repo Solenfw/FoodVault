@@ -1,0 +1,19 @@
+@model FoodVault.Models.ViewModels.FavoriteButtonViewModel
+
+<form asp-controller="Favorite" asp-action="@(Model.IsFavorite ? "Remove" : "Add")" method="post" class="d-inline">
+    <input type="hidden" name="recipeId" value="@Model.RecipeId" />
+    <button type="submit" class="btn btn-sm @(Model.IsFavorite ? "btn-danger" : "btn-outline-primary")">
+        @(Model.IsFavorite ? "Remove Favorite" : "Add to Favorites")
+    </button>
+</form>
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,18 @@
+@model IEnumerable<FoodVault.Models.ViewModels.RecipeListItemViewModel>
+@{
+    ViewData["Title"] = "My Recipes";
+}
+<partial name="~/Views/Shared/_Messages.cshtml" />
+<div class="mb-3">
+    <a asp-action="Create" class="btn btn-primary">Tạo công thức mới</a>
+</div>
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Bạn chưa có công thức nào! Hãy bắt đầu chia sẻ một món ăn mới.</div>
+}
+else
+{
+    <partial name="~/Views/Shared/_RecipeList.cshtml" model="Model" />
+}
+
+

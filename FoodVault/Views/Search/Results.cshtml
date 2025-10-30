@@ -1,0 +1,25 @@
+@model FoodVault.Models.ViewModels.SearchResultsViewModel
+@{
+    ViewData["Title"] = "Kết quả tìm kiếm";
+}
+
+<h2>Kết quả tìm kiếm cho: "@Model.Query"</h2>
+@if (Model.Results == null || !Model.Results.Any())
+{
+    <div class="alert alert-info">Không tìm thấy công thức hoặc nguyên liệu phù hợp.</div>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var r in Model.Results)
+        {
+            <a class="list-group-item list-group-item-action" asp-controller="Recipe" asp-action="Details" asp-route-id="@r.Id">
+                <strong>@r.Title</strong>
+                @if (!string.IsNullOrEmpty(r.Description))
+                {
+                    <br /><span class="small text-muted">@r.Description</span>
+                }
+            </a>
+        }
+    </div>
+}

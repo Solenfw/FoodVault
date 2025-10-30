@@ -1,8 +1,80 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model FoodVault.Models.ViewModels.HomeViewModel
+@{
+	ViewData["Title"] = "Home";
 }
+<section class="py-4 text-center">
+	<div class="container">
+		<h1 class="display-5 fw-bold">Welcome to FoodVault</h1>
+		<p class="lead text-muted">Discover recipes, track your fridge, and save your favorites.</p>
+		<a class="btn btn-primary btn-lg" asp-controller="Recipes" asp-action="Index">Explore Recipes</a>
+	</div>
+</section>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="pb-3">
+	<div class="container">
+		<h2 class="h4 mb-3">Popular Tags</h2>
+		<div class="owl-carousel owl-theme">
+			@foreach (var tag in Model.PopularTags)
+			{
+				<div class="item">
+					<a class="badge rounded-pill text-bg-light text-decoration-none p-2" asp-controller="Search" asp-action="ByTag" asp-route-id="@tag.Id">
+						<span class="me-1">#@tag.Name</span>
+						<span class="text-muted">@tag.Count</span>
+					</a>
+				</div>
+			}
+		</div>
+	</div>
+</section>
+
+<section class="pb-4">
+	<div class="container">
+		<h2 class="h4 mb-3">Top Favorites</h2>
+		<div class="owl-carousel owl-theme">
+			@foreach (var r in Model.TopFavorites)
+			{
+				<div class="item">
+					@await Component.InvokeAsync("RecipeCard", new { model = new RecipeCardViewModel
+					{ Id = r.Id, Title = r.Title, Description = r.Description, ImageUrl = r.ImageUrl, PrepTimeMinutes = r.PrepTimeMinutes, CookTimeMinutes = r.CookTimeMinutes, Servings = r.Servings, Rating = 0, IsFavorited = false } })
+				</div>
+			}
+		</div>
+	</div>
+</section>
+
+<section class="pb-5">
+	<div class="container">
+		<h2 class="h4 mb-3">Recent Recipes</h2>
+		<div class="owl-carousel owl-theme">
+			@foreach (var r in Model.RecentRecipes)
+			{
+				<div class="item">
+					@await Component.InvokeAsync("RecipeCard", new { model = new RecipeCardViewModel
+					{ Id = r.Id, Title = r.Title, Description = r.Description, ImageUrl = r.ImageUrl, PrepTimeMinutes = r.PrepTimeMinutes, CookTimeMinutes = r.CookTimeMinutes, Servings = r.Servings, Rating = 0, IsFavorited = false } })
+				</div>
+			}
+		</div>
+	</div>
+</section>
+
+@section Scripts {
+    <script src="~/js/owl.carousel.min.js"></script>
+    <link rel="stylesheet" href="~/css/owl.carousel.min.css" />
+    <link rel="stylesheet" href="~/css/owl.theme.default.min.css" />
+    <script>
+        $(document).ready(function() {
+            $(".owl-carousel").owlCarousel({
+                items: 3,
+                margin: 16,
+                loop: true,
+                nav: true,
+                dots: true,
+                responsive: {
+                    0: {items: 1},
+                    600: {items: 2},
+                    1000: {items: 3}
+                }
+            });
+        });
+    </script>
+}

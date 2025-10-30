@@ -1,0 +1,99 @@
+@model FoodVault.Models.ViewModels.EditRecipeViewModel
+@{
+    ViewData["Title"] = "Edit Recipe";
+}
+
+<partial name="~/Views/Shared/_Messages.cshtml" />
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Edit" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Servings" class="form-label"></label>
+                    <input asp-for="Servings" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="PrepTimeMinutes" class="form-label"></label>
+                    <input asp-for="PrepTimeMinutes" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="CookTimeMinutes" class="form-label"></label>
+                    <input asp-for="CookTimeMinutes" class="form-control" />
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a asp-action="Index" class="btn btn-secondary">Back</a>
+        </form>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>Thumbnail</h5>
+                @if (TempData["RecipeThumbUrl"] is string url && !string.IsNullOrEmpty(url))
+                {
+                    <img src="@url" class="img-fluid mb-2" />
+                }
+                <form asp-action="UploadThumbnail" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <input type="file" name="thumbnail" class="form-control mb-2" />
+                    <button type="submit" class="btn btn-outline-primary btn-sm">Upload</button>
+                </form>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>Ingredients</h5>
+                <form asp-action="AddIngredient" method="post" class="mb-2">
+                    <input type="hidden" name="RecipeId" value="@Model.Id" />
+                    <div class="input-group">
+                        <input type="text" name="IngredientId" class="form-control" placeholder="Ingredient Id" />
+                        <input type="number" step="any" name="Quantity" class="form-control" placeholder="Qty" />
+                        <input type="text" name="Unit" class="form-control" placeholder="Unit" />
+                        <button class="btn btn-outline-secondary" type="submit">Add</button>
+                    </div>
+                </form>
+                <!-- Listing ingredients would require including them in the viewmodel; omitted for brevity -->
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>Tags</h5>
+                <form asp-action="AddTag" method="post" class="mb-2">
+                    <input type="hidden" name="RecipeId" value="@Model.Id" />
+                    <div class="input-group">
+                        <input type="text" name="TagId" class="form-control" placeholder="Tag Id" />
+                        <button class="btn btn-outline-secondary" type="submit">Add</button>
+                    </div>
+                </form>
+                <!-- Listing tags would require including them in the viewmodel; omitted for brevity -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+
+
+
+
+
+
+
+
+
+

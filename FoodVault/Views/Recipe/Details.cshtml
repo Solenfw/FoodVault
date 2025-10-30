@@ -1,0 +1,71 @@
+@model FoodVault.Models.ViewModels.RecipeDetailsViewModel
+@{
+    ViewData["Title"] = Model.Title;
+}
+<h1 class="mb-4">@Model.Title</h1>
+@if (!string.IsNullOrEmpty(Model.ImageUrl))
+{
+    <div class="mb-4 text-center">
+        <img src="@Model.ImageUrl" alt="@Model.Title" class="img-fluid rounded shadow" style="max-height:340px;object-fit:cover;" />
+    </div>
+}
+@if (!string.IsNullOrWhiteSpace(Model.Description))
+{
+    <div class="alert alert-info fs-5">
+        @Model.Description
+    </div>
+}
+<div class="row mb-3">
+    <div class="col-md-3"><strong>Số suất ăn:</strong> @Model.Servings</div>
+    <div class="col-md-3"><strong>Chuẩn bị:</strong> @Model.PrepTimeMinutes phút</div>
+    <div class="col-md-3"><strong>Nấu:</strong> @Model.CookTimeMinutes phút</div>
+    <div class="col-md-3"><strong>Người tạo:</strong> @Model.AuthorName</div>
+</div>
+@if (Model.TotalCalories != null)
+{
+    <div class="mb-3">
+        <h5>Bảng dinh dưỡng tổng</h5>
+        <table class="table table-bordered w-auto">
+            <tr><td><b>Kcal</b>:</td><td>@Model.TotalCalories</td><td><b>Protein</b>:</td><td>@Model.TotalProtein</td></tr>
+            <tr><td><b>Fat</b>:</td><td>@Model.TotalFat</td><td><b>Carbs</b>:</td><td>@Model.TotalCarbs</td></tr>
+        </table>
+    </div>
+}
+<h4>Nguyên liệu</h4>
+@if (Model.Ingredients != null && Model.Ingredients.Count > 0)
+{
+    <table class="table table-sm table-bordered w-auto mb-4">
+        <thead><tr><th>Tên nguyên liệu</th><th>Số lượng</th><th>Đơn vị</th><th>Kcal</th><th>Protein</th><th>Fat</th><th>Carb</th></tr></thead>
+        <tbody>
+        @foreach (var ingr in Model.Ingredients)
+        {
+            <tr>
+                <td>@ingr.IngredientName</td>
+                <td>@ingr.Quantity</td>
+                <td>@ingr.Unit</td>
+                <td>@ingr.Calories</td>
+                <td>@ingr.Protein</td>
+                <td>@ingr.Fat</td>
+                <td>@ingr.Carbs</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else {
+    <div class="text-muted mb-3">Không có nguyên liệu nào.</div>
+}
+<h4>Các bước thực hiện</h4>
+<ol class="list-group list-group-numbered mb-4">
+@foreach (var step in Model.Steps) {
+    <li class="list-group-item mb-2"><span class="fw-bold">Bước @step.StepNumber:</span> @step.Instruction</li>
+}
+</ol>
+<div class="row mb-2 text-muted">
+    <div class="col">Tạo lúc: @Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</div>
+    <div class="col">Cập nhật: @Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm")</div>
+    <div class="col">Favorites: @Model.FavoriteCount | Đánh giá trung bình: @Model.AvgRating</div>
+</div>
+<a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+
+

@@ -1,0 +1,36 @@
+@model FoodVault.Models.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<partial name="~/Views/Shared/_Messages.cshtml" />
+
+<div class="row">
+    <div class="col-md-4">
+        <img src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/favicon.ico" : Model.AvatarUrl)" class="img-thumbnail" alt="Avatar" />
+    </div>
+    <div class="col-md-8">
+        <h2>@Model.Name</h2>
+        <p><strong>Email:</strong> @Model.Email</p>
+        <p><strong>Dietary Preferences:</strong> @Model.DietaryPreferences</p>
+        <p><strong>Dietary Restrictions:</strong> @Model.DietaryRestrictions</p>
+        <p>
+            <span class="badge bg-secondary">Recipes: @Model.NumRecipes</span>
+            <span class="badge bg-secondary">Favorites: @Model.NumFavorites</span>
+            <span class="badge bg-secondary">Fridges: @Model.NumFridges</span>
+        </p>
+        <a asp-action="Edit" class="btn btn-primary">Edit Profile</a>
+    </div>
+    
+</div>
+
+
+
+
+
+
+
+
+
+
+
