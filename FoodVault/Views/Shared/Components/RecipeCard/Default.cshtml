@@ -4,10 +4,13 @@
     <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/favicon.ico" : Model.ImageUrl)" class="card-img-top" alt="@Model.Title" />
     <div class="card-body">
         <h5 class="card-title">@Model.Title</h5>
+        <p class="card-img">@Model.ImageUrl</p>
         <p class="card-text">@Model.Description</p>
         <a asp-controller="Recipe" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-primary">View</a>
     </div>
 </div>
+
+
 
 
 

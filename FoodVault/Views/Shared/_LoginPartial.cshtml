@@ -16,7 +16,7 @@
 				<li>
 					<form class="px-3 py-1" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
 						<button type="submit" class="btn btn-link dropdown-item">Logout</button>
-						@Html.AntiForgeryToken()
+						
 					</form>
 				</li>
 			</ul>

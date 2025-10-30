@@ -49,8 +49,8 @@
 			@foreach (var r in Model.RecentRecipes)
 			{
 				<div class="item">
-					@await Component.InvokeAsync("RecipeCard", new { model = new RecipeCardViewModel
-					{ Id = r.Id, Title = r.Title, Description = r.Description, ImageUrl = r.ImageUrl, PrepTimeMinutes = r.PrepTimeMinutes, CookTimeMinutes = r.CookTimeMinutes, Servings = r.Servings, Rating = 0, IsFavorited = false } })
+					@await Component.InvokeAsync("RecipeCard",   new RecipeCardViewModel
+					{ Id = r.Id, Title = r.Title, Description = r.Description, ImageUrl = r.ImageUrl, PrepTimeMinutes = r.PrepTimeMinutes, CookTimeMinutes = r.CookTimeMinutes, Servings = r.Servings, Rating = 0, IsFavorited = false } )
 				</div>
 			}
 		</div>
