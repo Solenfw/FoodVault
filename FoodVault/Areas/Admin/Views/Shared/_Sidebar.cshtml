@@ -1,0 +1,141 @@
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var currentArea = ViewContext.RouteData.Values["area"]?.ToString();
+    
+    // Helper function to check if a route is active
+    Func<string, string, string, bool> IsActive = (controller, action, area) =>
+    {
+        if (!string.IsNullOrEmpty(area) && currentArea != area) return false;
+        if (!string.IsNullOrEmpty(controller) && currentController != controller) return false;
+        if (!string.IsNullOrEmpty(action) && currentAction != action) return false;
+        return true;
+    };
+    
+    // Helper function to get active class
+    Func<string, string, string, string> GetActiveClass = (controller, action, area) =>
+    {
+        return IsActive(controller, action, area) ? "active" : "";
+    };
+}
+
+<aside class="admin-sidebar">
+    <!-- Logo Section -->
+    <div class="sidebar-brand">
+        <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+            <i class="bi bi-egg-fried" style="font-size: 1.5rem; color: var(--admin-primary);"></i>
+            <h5 class="m-0">FoodVault</h5>
+        </div>
+        <span class="badge badge-primary">Admin</span>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+        <ul class="nav-list">
+            <!-- Dashboard -->
+            <li class="nav-item">
+                <a href="/admin/dashboard" class="nav-link @GetActiveClass("Dashboard", "Index", "Admin")">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+            <!-- Users -->
+            <li class="nav-item">
+                <a href="/admin/users" class="nav-link @GetActiveClass("Users", null, "Admin")">
+                    <i class="bi bi-people"></i>
+                    <span>Quản lý Users</span>
+                </a>
+            </li>
+
+            <!-- Recipes with submenu -->
+            <li class="nav-item has-submenu @(currentController == "Recipes" ? "active" : "")">
+                <div class="nav-link submenu-toggle">
+                    <i class="bi bi-book"></i>
+                    <span>Recipes</span>
+                    <i class="bi bi-chevron-down submenu-icon"></i>
+                </div>
+                <div class="submenu">
+                    <a href="/admin/recipes" class="submenu-link @GetActiveClass("Recipes", "Index", "Admin")">Tất cả</a>
+                    <a href="/admin/recipes/pending" class="submenu-link @GetActiveClass("Recipes", "Pending", "Admin")">Chờ duyệt</a>
+                    <a href="/admin/recipes/featured" class="submenu-link @GetActiveClass("Recipes", "Featured", "Admin")">Nổi bật</a>
+                </div>
+            </li>
+
+            <!-- Ingredients -->
+            <li class="nav-item">
+                <a href="/admin/ingredients" class="nav-link @GetActiveClass("Ingredients", null, "Admin")">
+                    <i class="bi bi-list-ul"></i>
+                    <span>Ingredients</span>
+                </a>
+            </li>
+
+            <!-- Tags -->
+            <li class="nav-item">
+                <a href="/admin/tags" class="nav-link @GetActiveClass("Tags", null, "Admin")">
+                    <i class="bi bi-tags"></i>
+                    <span>Tags</span>
+                </a>
+            </li>
+
+            <!-- Reports -->
+            <li class="nav-item">
+                <a href="/admin/reports" class="nav-link @GetActiveClass("Reports", null, "Admin")">
+                    <i class="bi bi-flag"></i>
+                    <span>Báo cáo</span>
+                    @* Badge for pending reports count *@
+                    @* <span class="badge badge-danger ms-auto">3</span> *@
+                </a>
+            </li>
+
+            <!-- Analytics -->
+            <li class="nav-item">
+                <a href="/admin/analytics" class="nav-link @GetActiveClass("Analytics", null, "Admin")">
+                    <i class="bi bi-graph-up"></i>
+                    <span>Analytics</span>
+                </a>
+            </li>
+
+            <!-- Settings -->
+            <li class="nav-item">
+                <a href="/admin/settings" class="nav-link @GetActiveClass("Settings", null, "Admin")">
+                    <i class="bi bi-gear"></i>
+                    <span>Cài đặt</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+        <a href="/" class="btn btn-outline">
+            <i class="bi bi-globe"></i> 
+            <span>Xem Website</span>
+        </a>
+    </div>
+</aside>
+
+<script>
+    // Toggle submenu on click
+    document.addEventListener('DOMContentLoaded', function() {
+        const submenuToggles = document.querySelectorAll('.submenu-toggle');
+        
+        submenuToggles.forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                const navItem = this.closest('.nav-item.has-submenu');
+                navItem.classList.toggle('active');
+            });
+        });
+
+        // Auto-expand submenu if current page is in submenu
+        const activeSubmenuLink = document.querySelector('.submenu-link.active');
+        if (activeSubmenuLink) {
+            const navItem = activeSubmenuLink.closest('.nav-item.has-submenu');
+            if (navItem) {
+                navItem.classList.add('active');
+            }
+        }
+    });
+</script>
+

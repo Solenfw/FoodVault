@@ -12,12 +12,14 @@ namespace FoodVault.Controllers
     {
         private readonly IUserService _userService;
         private readonly IImageService _imageService;
+        private readonly IUserPreferencesService _prefsService;
         private readonly ILogger<ProfileController> _logger;
 
-        public ProfileController(IUserService userService, IImageService imageService, ILogger<ProfileController> logger)
+        public ProfileController(IUserService userService, IImageService imageService, IUserPreferencesService prefsService, ILogger<ProfileController> logger)
         {
             _userService = userService;
             _imageService = imageService;
+            _prefsService = prefsService;
             _logger = logger;
         }
 
@@ -43,6 +45,7 @@ namespace FoodVault.Controllers
                 NumFavorites = stats.NumFavorites,
                 NumFridges = stats.NumFridges
             };
+            ViewBag.Theme = await _prefsService.GetThemeAsync(userId);
             return View(vm);
         }
 
@@ -125,6 +128,18 @@ namespace FoodVault.Controllers
                 TempData["Error"] = "Failed to update avatar.";
             }
             return RedirectToAction(nameof(Edit));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SetTheme(string theme, [FromServices] IThemeService themeService)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Account");
+        await themeService.SetUserThemeAsync(userId, theme);
+        themeService.SetThemeCookie(Response, theme);
+            TempData["Success"] = "Theme updated.";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

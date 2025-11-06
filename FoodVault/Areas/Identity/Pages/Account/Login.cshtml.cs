@@ -15,17 +15,20 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using FoodVault.Constants;
 
 namespace FoodVault.Areas.Identity.Pages.Account
 {
     public class LoginModel : PageModel
     {
         private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<User> _userManager;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<User> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<User> signInManager, UserManager<User> userManager, ILogger<LoginModel> logger)
         {
             _signInManager = signInManager;
+            _userManager = userManager;
             _logger = logger;
         }
 
@@ -112,10 +115,35 @@ namespace FoodVault.Areas.Identity.Pages.Account
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                
+                // Tìm user bằng email hoặc username
+                var user = await _userManager.FindByEmailAsync(Input.Email);
+                if (user == null)
+                {
+                    // Nếu không tìm thấy bằng email, thử tìm bằng username
+                    user = await _userManager.FindByNameAsync(Input.Email);
+                }
+                
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return Page();
+                }
+                
+                var result = await _signInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User logged in.");
+                    _logger.LogInformation("User logged in: {Email}", Input.Email);
+                    
+                    // Kiểm tra role và redirect
+                    if (await _userManager.IsInRoleAsync(user, AppRoles.Admin) || await _userManager.IsInRoleAsync(user, AppRoles.Moderator))
+                    {
+                        // Nếu là Admin hoặc Moderator, redirect đến admin dashboard
+                        _logger.LogInformation("Admin/Moderator logged in, redirecting to admin dashboard");
+                        return LocalRedirect("/admin/dashboard");
+                    }
+                    
+                    // Nếu không phải admin, redirect đến returnUrl hoặc home
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)

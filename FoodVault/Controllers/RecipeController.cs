@@ -13,31 +13,52 @@ namespace FoodVault.Controllers
     {
         private readonly IRecipeService _recipeService;
         private readonly ILogger<RecipeController> _logger;
-
         private readonly IImageService _imageService;
+        private readonly IRatingService _ratingService;
+        private readonly IFavoriteService _favoriteService;
 
-        public RecipeController(IRecipeService recipeService, ILogger<RecipeController> logger, IImageService imageService)
+        public RecipeController(IRecipeService recipeService, ILogger<RecipeController> logger, IImageService imageService, IRatingService ratingService, IFavoriteService favoriteService)
         {
             _recipeService = recipeService;
             _logger = logger;
             _imageService = imageService;
+            _ratingService = ratingService;
+            _favoriteService = favoriteService;
         }
 
+        private sealed class TagSelection
+        {
+            public string Id { get; set; } = string.Empty;
+            public string Name { get; set; } = string.Empty;
+        }
+
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Account");
-
-            var recipes = await _recipeService.GetUserRecipesAsync(userId);
-            var vms = recipes.Select(r => new RecipeListItemViewModel
+            try
             {
-                Id = r.Id,
-                Title = r.Title,
-                Description = r.Description,
-                UpdatedAt = r.UpdatedAt
-            }).ToList();
-            return View(vms);
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId)) return Redirect("/Identity/Account/Login");
+
+                var recipes = await _recipeService.GetUserRecipesAsync(userId);
+                var vms = recipes.Select(r => new RecipeListItemViewModel
+                {
+                    Id = r.Id,
+                    Title = r.Title,
+                    Description = r.Description,
+                    ImageUrl = r.ImageUrl,
+                    UpdatedAt = r.UpdatedAt,
+                    UserId = r.UserId
+                }).ToList();
+                return View(vms);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading recipe index");
+                TempData["Error"] = "Có lỗi xảy ra khi tải danh sách công thức.";
+                return View(new List<RecipeListItemViewModel>());
+            }
         }
 
         [HttpGet]
@@ -48,7 +69,7 @@ namespace FoodVault.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateRecipeViewModel vm)
+        public async Task<IActionResult> Create(CreateRecipeViewModel vm, IFormFile? Image, string? TagsJson)
         {
             if (!ModelState.IsValid)
             {
@@ -67,7 +88,44 @@ namespace FoodVault.Controllers
                     PrepTimeMinutes = vm.PrepTimeMinutes,
                     CookTimeMinutes = vm.CookTimeMinutes
                 };
-                await _recipeService.CreateRecipeAsync(entity);
+
+                // Upload image if provided
+                if (Image != null && Image.Length > 0)
+                {
+                    try
+                    {
+                        var imageUrl = await _imageService.UploadImageAsync(Image, "recipe-thumbs");
+                        entity.ImageUrl = imageUrl;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to upload image for recipe, continuing without image");
+                        // Continue without image if upload fails
+                    }
+                }
+
+                var recipe = await _recipeService.CreateRecipeAsync(entity);
+
+                // Handle tags if provided
+                if (!string.IsNullOrWhiteSpace(TagsJson))
+                {
+                    try
+                    {
+                        var tagSelections = System.Text.Json.JsonSerializer.Deserialize<List<TagSelection>>(TagsJson, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<TagSelection>();
+                        foreach (var t in tagSelections)
+                        {
+                            if (!string.IsNullOrEmpty(t.Id))
+                            {
+                                await _recipeService.AddTagAsync(recipe.Id, t.Id);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to parse/add tags for recipe {RecipeId}", recipe.Id);
+                    }
+                }
+
                 TempData["Success"] = "Recipe created.";
                 return RedirectToAction(nameof(Index));
             }
@@ -91,7 +149,8 @@ namespace FoodVault.Controllers
                 Description = recipe.Description,
                 Servings = recipe.Servings,
                 PrepTimeMinutes = recipe.PrepTimeMinutes,
-                CookTimeMinutes = recipe.CookTimeMinutes
+                CookTimeMinutes = recipe.CookTimeMinutes,
+                ImageUrl = recipe.ImageUrl
             };
             return View(vm);
         }
@@ -134,10 +193,16 @@ namespace FoodVault.Controllers
 
             try
             {
-                // No Recipe.ImageUrl field exists; store path transiently for demo
                 var url = await _imageService.UploadImageAsync(thumbnail, "recipe-thumbs");
+                var existing = await _recipeService.GetRecipeByIdAsync(id);
+                if (existing == null)
+                {
+                    TempData["Error"] = "Recipe not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+                existing.ImageUrl = url;
+                await _recipeService.UpdateRecipeAsync(existing);
                 TempData["Success"] = "Thumbnail uploaded.";
-                TempData["RecipeThumbUrl"] = url;
             }
             catch (Exception ex)
             {
@@ -265,6 +330,27 @@ namespace FoodVault.Controllers
             int favoriteCount = recipe.Favorites?.Count ?? 0;
             string authorName = recipe.User?.UserName ?? recipe.UserId;
 
+            // Check if current user has favorited this recipe
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            bool isFavorited = false;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                isFavorited = await _favoriteService.IsFavoriteAsync(userId, recipe.Id);
+            }
+
+            // Load ratings with User information
+            var ratings = await _ratingService.GetRatingsForRecipeAsync(recipe.Id);
+            var ratingVMs = ratings.Select(r => new RatingViewModel
+            {
+                Id = r.Id,
+                UserId = r.UserId,
+                UserName = r.User?.UserName ?? r.UserId,
+                RecipeId = r.RecipeId,
+                Rating = r.Rating1,
+                Comment = r.Comment,
+                RatedAt = r.RatedAt
+            }).ToList();
+
             var vm = new RecipeDetailsViewModel
             {
                 Id = recipe.Id,
@@ -282,6 +368,8 @@ namespace FoodVault.Controllers
                 TotalCarbs = totalCarb,
                 AvgRating = avgRating,
                 FavoriteCount = favoriteCount,
+                IsFavorited = isFavorited,
+                Ratings = ratingVMs,
                 CreatedAt = recipe.CreatedAt,
                 UpdatedAt = recipe.UpdatedAt,
                 Steps = recipe.Steps?.OrderBy(s => s.StepNumber)
@@ -292,6 +380,53 @@ namespace FoodVault.Controllers
             };
 
             return View(vm);
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> Print(string id)
+        {
+            var recipe = await _recipeService.GetRecipeByIdAsync(id);
+            if (recipe == null) return NotFound();
+
+            var ingredientVMs = recipe.RecipeIngredients
+                .Select(ri => new RecipeIngredientDetailsViewModel {
+                    IngredientName = ri.Ingredient?.Name ?? ri.IngredientId,
+                    Quantity = ri.Quantity,
+                    Unit = ri.Unit,
+                    Calories = ri.Quantity * (ri.Ingredient?.DefaultCalories ?? 0),
+                    Protein = ri.Quantity * (ri.Ingredient?.DefaultProtein ?? 0),
+                    Fat = ri.Quantity * (ri.Ingredient?.DefaultFat ?? 0),
+                    Carbs = ri.Quantity * (ri.Ingredient?.DefaultCarbs ?? 0)
+                }).ToList();
+
+            double totalCal = ingredientVMs.Sum(i => i.Calories ?? 0);
+            double totalProtein = ingredientVMs.Sum(i => i.Protein ?? 0);
+            double totalFat = ingredientVMs.Sum(i => i.Fat ?? 0);
+            double totalCarb = ingredientVMs.Sum(i => i.Carbs ?? 0);
+
+            var vm = new RecipeDetailsViewModel
+            {
+                Id = recipe.Id,
+                Title = recipe.Title,
+                Description = recipe.Description,
+                ImageUrl = recipe.ImageUrl,
+                Servings = recipe.Servings,
+                PrepTimeMinutes = recipe.PrepTimeMinutes,
+                CookTimeMinutes = recipe.CookTimeMinutes,
+                AuthorName = recipe.User?.UserName ?? recipe.UserId,
+                Ingredients = ingredientVMs,
+                TotalCalories = totalCal,
+                TotalProtein = totalProtein,
+                TotalFat = totalFat,
+                TotalCarbs = totalCarb,
+                CreatedAt = recipe.CreatedAt,
+                UpdatedAt = recipe.UpdatedAt,
+                Steps = recipe.Steps?.OrderBy(s => s.StepNumber)
+                    .Select(s => new StepViewModel { StepNumber = s.StepNumber, Instruction = s.Instruction }).ToList() ?? new List<StepViewModel>()
+            };
+
+            return View("Print", vm);
         }
     }
 }

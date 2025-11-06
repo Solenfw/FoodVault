@@ -1,0 +1,28 @@
+@model FoodVault.Areas.Admin.ViewModels.StatsCardViewModel
+
+@{
+    var icon = Model?.Icon ?? "bi-circle";
+    var title = Model?.Title ?? "";
+    var value = Model?.Value ?? "0";
+    var change = Model?.Change ?? 0;
+    var changeLabel = Model?.ChangeLabel ?? "";
+    var type = Model?.Type ?? "primary";
+}
+
+<div class="stats-card @type">
+    <div class="stats-icon">
+        <i class="bi @icon"></i>
+    </div>
+    <div class="stats-value">@value</div>
+    <div class="stats-label">@title</div>
+    @if (change > 0 && !string.IsNullOrEmpty(changeLabel))
+    {
+        <div class="stats-change mt-2">
+            <span class="badge badge-success">
+                <i class="bi bi-arrow-up me-1"></i>
+                +@change @changeLabel
+            </span>
+        </div>
+    }
+</div>
+

@@ -1,14 +1,30 @@
 @model FoodVault.Models.ViewModels.ProfileViewModel
 @{
     ViewData["Title"] = "My Profile";
+    var theme = ViewBag.Theme as string ?? "auto";
 }
 
 <partial name="~/Views/Shared/_Messages.cshtml" />
 
 <div class="row">
     <div class="col-md-4">
-        <img src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/favicon.ico" : Model.AvatarUrl)" class="img-thumbnail" alt="Avatar" />
+        <img src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/favicon.ico" : Model.AvatarUrl)"
+             class="img-thumbnail" alt="Avatar" />
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5 class="card-title">Theme</h5>
+                <form asp-action="SetTheme" method="post" class="d-flex gap-2 align-items-center">
+                    <select name="theme" class="form-select form-select-sm" style="max-width: 180px;">
+                        <option value="auto" selected="@(theme == "auto")">Auto</option>
+                        <option value="light" selected="@(theme == "light")">Light</option>
+                        <option value="dark" selected="@(theme == "dark")">Dark</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-primary">Lưu</button>
+                </form>
+            </div>
+        </div>
     </div>
+
     <div class="col-md-8">
         <h2>@Model.Name</h2>
         <p><strong>Email:</strong> @Model.Email</p>
@@ -21,19 +37,4 @@
         </p>
         <a asp-action="Edit" class="btn btn-primary">Edit Profile</a>
     </div>
-    
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-

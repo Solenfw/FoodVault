@@ -1,0 +1,90 @@
+@{
+    ViewData["Title"] = "Access Denied";
+    Layout = "_Layout";
+}
+
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+        <div class="col-md-6 text-center">
+            <div class="error-content">
+                <i class="bi bi-shield-x text-danger" style="font-size: 120px;"></i>
+                
+                <h1 class="display-4 fw-bold mt-4">403</h1>
+                <h2 class="mb-4">Truy cập bị từ chối</h2>
+                
+                <p class="lead text-muted mb-4">
+                    Bạn không có quyền truy cập vào trang này.
+                </p>
+                
+                <div class="alert alert-warning" role="alert">
+                    <i class="bi bi-info-circle"></i>
+                    Chỉ có quản trị viên (Admin) hoặc người kiểm duyệt (Moderator) 
+                    mới có thể truy cập Admin Panel.
+                </div>
+                
+                <div class="mt-5">
+                    <a href="/" class="btn btn-primary btn-lg me-2">
+                        <i class="bi bi-house-door"></i> Về trang chủ
+                    </a>
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+                
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="mt-4">
+                        <small class="text-muted">
+                            Đang đăng nhập với tài khoản: <strong>@User.Identity.Name</strong>
+                        </small>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .error-content {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .bi-shield-x {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @@keyframes shake {
+            0%, 100% { 
+                transform: rotate(0deg); 
+            }
+            25% { 
+                transform: rotate(-10deg); 
+            }
+            75% { 
+                transform: rotate(10deg); 
+            }
+        }
+        
+        .alert-warning {
+            border-left: 4px solid #ffc107;
+            text-align: left;
+        }
+        
+        .alert-warning i {
+            margin-right: 8px;
+        }
+    </style>
+}
+

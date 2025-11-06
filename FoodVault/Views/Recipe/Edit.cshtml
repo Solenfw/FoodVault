@@ -41,9 +41,9 @@
         <div class="card mb-3">
             <div class="card-body">
                 <h5>Thumbnail</h5>
-                @if (TempData["RecipeThumbUrl"] is string url && !string.IsNullOrEmpty(url))
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
                 {
-                    <img src="@url" class="img-fluid mb-2" />
+                    <img src="@Model.ImageUrl" class="img-fluid mb-2" />
                 }
                 <form asp-action="UploadThumbnail" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="id" value="@Model.Id" />
@@ -86,6 +86,7 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+
 
 
 

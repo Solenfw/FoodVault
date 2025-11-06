@@ -25,6 +25,7 @@ namespace FoodVault.Models.ViewModels
 		public int? PrepTimeMinutes { get; set; }
 		public int? CookTimeMinutes { get; set; }
 		public int? Servings { get; set; }
+		public double Rating { get; set; }
 	}
 }
 

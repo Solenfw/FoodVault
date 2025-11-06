@@ -1,0 +1,237 @@
+@{
+    ViewData["Title"] = "Admin Access Test";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-content">
+    <div class="container-fluid">
+        <div class="content-header mb-4">
+            <h1>🧪 Admin Access Test Page</h1>
+            <p class="text-muted">Kiểm tra quyền truy cập và role của người dùng hiện tại</p>
+        </div>
+
+        <div class="row g-3 mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="m-0">
+                            <i class="bi bi-check-circle"></i> Access Granted!
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Nếu bạn thấy trang này, nghĩa là bạn đã:</p>
+                        <ul>
+                            <li>✅ Đăng nhập thành công</li>
+                            <li>✅ Có role Admin hoặc Moderator</li>
+                            <li>✅ Được phép truy cập Admin Panel</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="m-0">
+                            <i class="bi bi-person"></i> User Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Username:</strong></td>
+                                        <td>@(User.Identity?.Name ?? "N/A")</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Email:</strong></td>
+                                        <td>@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "N/A")</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>User ID:</strong></td>
+                                        <td>@(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "N/A")</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Is Authenticated:</strong></td>
+                                        <td>
+                                            @if (User.Identity?.IsAuthenticated == true)
+                                            {
+                                                <span class="badge badge-success">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-danger">No</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Authentication Type:</strong></td>
+                                        <td>@(User.Identity?.AuthenticationType ?? "N/A")</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Roles:</strong></td>
+                                        <td>
+                                            @{
+                                                var roleClaims = User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).ToList();
+                                            }
+                                            @if (roleClaims.Any())
+                                            {
+                                                @foreach (var claim in roleClaims)
+                                                {
+                                                    <span class="badge badge-primary me-1">@claim.Value</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">No roles assigned</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="m-0">
+                            <i class="bi bi-list-check"></i> Role Checks
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <div class="text-center p-3 border rounded h-100">
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <i class="bi bi-check-circle-fill text-success" style="font-size: 48px;"></i>
+                                        <p class="mt-2 mb-0"><strong>Admin</strong></p>
+                                        <small class="text-success">✓ Role Active</small>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-x-circle text-muted" style="font-size: 48px;"></i>
+                                        <p class="mt-2 mb-0 text-muted">Admin</p>
+                                        <small class="text-muted">✗ Not Assigned</small>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center p-3 border rounded h-100">
+                                    @if (User.IsInRole("Moderator"))
+                                    {
+                                        <i class="bi bi-check-circle-fill text-success" style="font-size: 48px;"></i>
+                                        <p class="mt-2 mb-0"><strong>Moderator</strong></p>
+                                        <small class="text-success">✓ Role Active</small>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-x-circle text-muted" style="font-size: 48px;"></i>
+                                        <p class="mt-2 mb-0 text-muted">Moderator</p>
+                                        <small class="text-muted">✗ Not Assigned</small>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center p-3 border rounded h-100">
+                                    @if (User.IsInRole("User"))
+                                    {
+                                        <i class="bi bi-check-circle-fill text-success" style="font-size: 48px;"></i>
+                                        <p class="mt-2 mb-0"><strong>User</strong></p>
+                                        <small class="text-success">✓ Role Active</small>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-x-circle text-muted" style="font-size: 48px;"></i>
+                                        <p class="mt-2 mb-0 text-muted">User</p>
+                                        <small class="text-muted">✗ Not Assigned</small>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center p-3 border rounded h-100">
+                                    @if (User.IsInRole("Premium"))
+                                    {
+                                        <i class="bi bi-check-circle-fill text-success" style="font-size: 48px;"></i>
+                                        <p class="mt-2 mb-0"><strong>Premium</strong></p>
+                                        <small class="text-success">✓ Role Active</small>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-x-circle text-muted" style="font-size: 48px;"></i>
+                                        <p class="mt-2 mb-0 text-muted">Premium</p>
+                                        <small class="text-muted">✗ Not Assigned</small>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="m-0">
+                            <i class="bi bi-info-circle"></i> All User Claims
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @if (User.Claims.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Value</th>
+                                            <th>Issuer</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var claim in User.Claims.OrderBy(c => c.Type))
+                                        {
+                                            <tr>
+                                                <td><code>@claim.Type</code></td>
+                                                <td>@claim.Value</td>
+                                                <td><small class="text-muted">@claim.Issuer</small></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No claims found for this user.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4 mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <a href="/admin/dashboard" class="btn btn-primary me-2">
+                            <i class="bi bi-speedometer2"></i> Back to Dashboard
+                        </a>
+                        <a href="/" class="btn btn-outline-secondary">
+                            <i class="bi bi-house-door"></i> Go to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

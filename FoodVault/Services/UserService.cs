@@ -2,6 +2,7 @@ using FoodVault.Models.Data;
 using FoodVault.Models.Entities;
 using FoodVault.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace FoodVault.Services;
 
@@ -71,6 +72,41 @@ public sealed class UserService : IUserService
             throw;
         }
     }
+}
+
+public sealed class UserPreferencesService : IUserPreferencesService
+{
+	private readonly FoodVaultDbContext _db;
+	private readonly ILogger<UserPreferencesService> _logger;
+
+	public UserPreferencesService(FoodVaultDbContext db, ILogger<UserPreferencesService> logger)
+	{
+		_db = db;
+		_logger = logger;
+	}
+
+	public async Task<string> GetThemeAsync(string userId, CancellationToken cancellationToken = default)
+	{
+		var pref = await _db.UserPreferences.AsNoTracking().FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken);
+		return pref?.Theme ?? "auto";
+	}
+
+	public async Task SetThemeAsync(string userId, string theme, CancellationToken cancellationToken = default)
+	{
+		if (theme != "light" && theme != "dark" && theme != "auto") theme = "auto";
+		var pref = await _db.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken);
+		if (pref == null)
+		{
+			pref = new FoodVault.Models.Entities.UserPreferences { Id = Guid.NewGuid().ToString(), UserId = userId, Theme = theme, UpdatedAt = DateTime.UtcNow };
+			await _db.UserPreferences.AddAsync(pref, cancellationToken);
+		}
+		else
+		{
+			pref.Theme = theme;
+			pref.UpdatedAt = DateTime.UtcNow;
+		}
+		await _db.SaveChangesAsync(cancellationToken);
+	}
 }
 
 

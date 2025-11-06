@@ -1,6 +1,8 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using FoodVault.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace FoodVault.Controllers
 {
@@ -14,9 +16,11 @@ namespace FoodVault.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([FromServices] IThemeService themeService)
 		{
-			var vm = await _homeService.GetHomeAsync();
+            var vm = await _homeService.GetHomeAsync();
+            var theme = await themeService.ResolveThemeAsync(User, Request);
+            ViewData["UserTheme"] = theme;
 			return View(vm);
 		}
 	}

@@ -42,7 +42,7 @@ namespace FoodVault.Services
 				.ToListAsync();
 
 			// Top favorites: recipes with most favorites
-			var topFavorites = await _dbContext.Favorites
+			var topFavoritesData = await _dbContext.Favorites
 				.GroupBy(f => f.RecipeId)
 				.Select(g => new { RecipeId = g.Key!, Count = g.Count() })
 				.OrderByDescending(x => x.Count)
@@ -50,34 +50,52 @@ namespace FoodVault.Services
 				.Join(_dbContext.Recipes,
 					g => g.RecipeId,
 					r => r.Id,
-					(g, r) => new RecipeItem
-					{
-						Id = r.Id,
-						Title = r.Title,
-						Description = r.Description,
-						// ImageUrl placeholder: extend Recipe entity if available
-						ImageUrl = null,
-						PrepTimeMinutes = r.PrepTimeMinutes,
-						CookTimeMinutes = r.CookTimeMinutes,
-						Servings = r.Servings
-					})
+					(g, r) => new { Recipe = r, FavoriteCount = g.Count })
 				.ToListAsync();
 
+			var topFavoritesRecipeIds = topFavoritesData.Select(x => x.Recipe.Id).ToList();
+			var topFavoritesRatings = await _dbContext.Ratings
+				.Where(r => topFavoritesRecipeIds.Contains(r.RecipeId))
+				.GroupBy(r => r.RecipeId)
+				.Select(g => new { RecipeId = g.Key, AvgRating = g.Average(r => (double)r.Rating1) })
+				.ToDictionaryAsync(x => x.RecipeId, x => x.AvgRating);
+
+			var topFavorites = topFavoritesData.Select(rf => new RecipeItem
+			{
+				Id = rf.Recipe.Id,
+				Title = rf.Recipe.Title,
+				Description = rf.Recipe.Description,
+				ImageUrl = rf.Recipe.ImageUrl,
+				PrepTimeMinutes = rf.Recipe.PrepTimeMinutes,
+				CookTimeMinutes = rf.Recipe.CookTimeMinutes,
+				Servings = rf.Recipe.Servings,
+				Rating = topFavoritesRatings.ContainsKey(rf.Recipe.Id) ? topFavoritesRatings[rf.Recipe.Id] : 0
+			}).ToList();
+
 			// Recent recipes by CreatedAt
-			var recentRecipes = await _dbContext.Recipes
+			var recentRecipesData = await _dbContext.Recipes
 				.OrderByDescending(r => r.CreatedAt)
 				.Take(12)
-				.Select(r => new RecipeItem
-				{
-					Id = r.Id,
-					Title = r.Title,
-					Description = r.Description,
-					ImageUrl = null,
-					PrepTimeMinutes = r.PrepTimeMinutes,
-					CookTimeMinutes = r.CookTimeMinutes,
-					Servings = r.Servings
-				})
 				.ToListAsync();
+
+			var recentRecipeIds = recentRecipesData.Select(r => r.Id).ToList();
+			var recentRecipesRatings = await _dbContext.Ratings
+				.Where(r => recentRecipeIds.Contains(r.RecipeId))
+				.GroupBy(r => r.RecipeId)
+				.Select(g => new { RecipeId = g.Key, AvgRating = g.Average(r => (double)r.Rating1) })
+				.ToDictionaryAsync(x => x.RecipeId, x => x.AvgRating);
+
+			var recentRecipes = recentRecipesData.Select(r => new RecipeItem
+			{
+				Id = r.Id,
+				Title = r.Title,
+				Description = r.Description,
+				ImageUrl = r.ImageUrl,
+				PrepTimeMinutes = r.PrepTimeMinutes,
+				CookTimeMinutes = r.CookTimeMinutes,
+				Servings = r.Servings,
+				Rating = recentRecipesRatings.ContainsKey(r.Id) ? recentRecipesRatings[r.Id] : 0
+			}).ToList();
 
 			var vm = new HomeViewModel
 			{

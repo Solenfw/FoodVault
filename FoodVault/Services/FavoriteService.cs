@@ -2,6 +2,7 @@ using FoodVault.Models.Data;
 using FoodVault.Models.Entities;
 using FoodVault.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace FoodVault.Services;
 
@@ -9,11 +10,14 @@ public sealed class FavoriteService : IFavoriteService
 {
     private readonly FoodVaultDbContext _dbContext;
     private readonly ILogger<FavoriteService> _logger;
+    private readonly IMemoryCache _cache;
+    private const string HomeCacheKey = "home:index:data";
 
-    public FavoriteService(FoodVaultDbContext dbContext, ILogger<FavoriteService> logger)
+    public FavoriteService(FoodVaultDbContext dbContext, ILogger<FavoriteService> logger, IMemoryCache cache)
     {
         _dbContext = dbContext;
         _logger = logger;
+        _cache = cache;
     }
 
     public async Task<Favorite> AddFavoriteAsync(string userId, string recipeId, CancellationToken cancellationToken = default)
@@ -36,6 +40,7 @@ public sealed class FavoriteService : IFavoriteService
 
             await _dbContext.Favorites.AddAsync(fav, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
+            InvalidateHomeCache();
             return fav;
         }
         catch (Exception ex)
@@ -57,6 +62,7 @@ public sealed class FavoriteService : IFavoriteService
 
             _dbContext.Favorites.Remove(fav);
             await _dbContext.SaveChangesAsync(cancellationToken);
+            InvalidateHomeCache();
             return true;
         }
         catch (Exception ex)
@@ -97,6 +103,11 @@ public sealed class FavoriteService : IFavoriteService
             _logger.LogError(ex, "Failed to get user favorite recipes for {UserId}", userId);
             throw;
         }
+    }
+
+    private void InvalidateHomeCache()
+    {
+        _cache.Remove(HomeCacheKey);
     }
 }
 

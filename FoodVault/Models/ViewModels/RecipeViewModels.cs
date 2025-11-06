@@ -7,7 +7,9 @@ public sealed class RecipeListItemViewModel
     public string Id { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public string? ImageUrl { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public string UserId { get; set; } = string.Empty;
 }
 
 public sealed class RecipeIngredientDetailsViewModel {
@@ -40,8 +42,33 @@ public sealed class RecipeDetailsViewModel {
     public List<StepViewModel> Steps { get; set; } = new();
     public double? AvgRating { get; set; }
     public int? FavoriteCount { get; set; }
+    public bool IsFavorited { get; set; }
+    public List<RatingViewModel> Ratings { get; set; } = new();
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+}
+
+public sealed class RatingViewModel
+{
+    public string Id { get; set; } = string.Empty;
+    public string UserId { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
+    public string RecipeId { get; set; } = string.Empty;
+    public int Rating { get; set; }
+    public string? Comment { get; set; }
+    public DateTime? RatedAt { get; set; }
+}
+
+public sealed class AddRatingViewModel
+{
+    [Required]
+    public string RecipeId { get; set; } = string.Empty;
+    
+    [Required]
+    [Range(1, 5, ErrorMessage = "Rating must be between 1 and 5")]
+    public int Rating { get; set; }
+    
+    public string? Comment { get; set; }
 }
 
 public sealed class CreateRecipeViewModel
@@ -66,6 +93,7 @@ public sealed class EditRecipeViewModel
     public int? Servings { get; set; }
     public int? PrepTimeMinutes { get; set; }
     public int? CookTimeMinutes { get; set; }
+    public string? ImageUrl { get; set; }
 }
 
 public sealed class AddRecipeIngredientViewModel

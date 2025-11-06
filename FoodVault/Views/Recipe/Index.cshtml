@@ -1,18 +1,62 @@
+@using System.Security.Claims;
 @model IEnumerable<FoodVault.Models.ViewModels.RecipeListItemViewModel>
 @{
-    ViewData["Title"] = "My Recipes";
+    ViewData["Title"] = "Recipes";
 }
 <partial name="~/Views/Shared/_Messages.cshtml" />
-<div class="mb-3">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h4 m-0">Recipe Feed</h2>
     <a asp-action="Create" class="btn btn-primary">Tạo công thức mới</a>
+    <noscript><a class="btn btn-outline-secondary" href="?page=2">Load more</a></noscript>
+    <link rel="stylesheet" href="~/css/skeleton.css" />
 </div>
-@if (!Model.Any())
-{
-    <div class="alert alert-info">Bạn chưa có công thức nào! Hãy bắt đầu chia sẻ một món ăn mới.</div>
-}
-else
-{
-    <partial name="~/Views/Shared/_RecipeList.cshtml" model="Model" />
-}
+
+<div id="recipeEmpty" class="alert alert-info" style="display:none">Chưa có công thức nào.</div>
+<div id="recipeError" class="alert alert-danger" style="display:none"></div>
+
+<div id="recipeGrid" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3" data-disable-infinite-scroll="true">
+    @* initial SSR items if provided *@
+    @foreach (var r in Model)
+    {
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                @if (!string.IsNullOrWhiteSpace(r.ImageUrl))
+                {
+                    <img src="@r.ImageUrl" class="card-img-top object-fit-cover" alt="@r.Title" style="aspect-ratio: 16/9; max-height: 200px;" />
+                }
+                else
+                {
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="aspect-ratio: 16/9; max-height: 200px;">
+                        <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                    </div>
+                }
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">@r.Title</h5>
+                    <p class="card-text text-muted small flex-grow-1">@r.Description</p>
+                    <div class="mt-auto d-flex gap-2">
+                        <a class="btn btn-sm btn-primary flex-grow-1" asp-controller="Recipe" asp-action="Details" asp-route-id="@r.Id">View Details</a>
+                        @if (User.Identity?.IsAuthenticated == true && User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier) == r.UserId)
+                        {
+                            <form asp-controller="Recipe" asp-action="Delete" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@r.Id" />
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa công thức này không?')" title="Xóa công thức">
+                                    🗑️
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div id="recipeLoader" class="text-center my-3" style="display:none">
+    <partial name="~/Views/Shared/_SkeletonCard.cshtml" />
+</div>
+
+@* Infinite scroll is disabled for this page - script not needed *@
 
 

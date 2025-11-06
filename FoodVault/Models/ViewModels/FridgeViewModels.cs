@@ -13,9 +13,12 @@ public sealed class AddFridgeItemViewModel
     [Required]
     public string FridgeId { get; set; } = string.Empty;
     [Required]
-    public string IngredientId { get; set; } = string.Empty;
+    public string IngredientName { get; set; } = string.Empty;
     public double? Quantity { get; set; }
     public string? Unit { get; set; }
+    public DateOnly? ExpirationDate { get; set; }
+    // Tùy chọn: số ngày sử dụng (nếu nhập, sẽ cộng từ ngày hiện tại)
+    public int? DaysToExpire { get; set; }
 }
 
 public sealed class RemoveFridgeItemViewModel

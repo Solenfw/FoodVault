@@ -18,6 +18,9 @@ public interface IRecipeService
     // Ingredients
     Task<RecipeIngredient> AddIngredientAsync(RecipeIngredient ingredient, CancellationToken cancellationToken = default);
     Task<bool> RemoveIngredientAsync(string recipeIngredientId, CancellationToken cancellationToken = default);
+
+    // Pagination
+    Task<(IReadOnlyList<Recipe> Items, bool HasMore, int NextPage)> GetRecipesPaginatedAsync(int page, int pageSize, CancellationToken cancellationToken = default);
 }
 
 

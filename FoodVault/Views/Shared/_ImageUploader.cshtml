@@ -1,0 +1,14 @@
+@* Reusable image uploader *@
+<link rel="stylesheet" href="~/css/image-upload.css" />
+<div class="fv-upload" data-upload data-container="uploads" data-prefix="" data-aspect="16:9" data-delete-old="false" data-old-paths="[]">
+    <div>
+        <div>Drag & drop images here or</div>
+        <button class="btn btn-sm btn-primary" type="button" data-pick>Choose files</button>
+        <div class="text-muted small mt-1">JPG, PNG, WebP · Max 5MB</div>
+    </div>
+    <input type="file" accept="image/*" multiple data-input />
+</div>
+<div class="fv-previews" data-previews></div>
+<script src="~/js/image-upload.js"></script>
+
+

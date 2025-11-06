@@ -2,13 +2,22 @@
     var title = ViewData["Title"] as string ?? "FoodVault";
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="auto">
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<title>@title - FoodVault</title>
+	<link rel="stylesheet" href="~/css/bootstrap.min.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/font-awesome.min.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/elegant-icons.css" asp-append-version= "true" />
+	<link rel="stylesheet" href="~/css/nice-select.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/owl.carousel.min.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/slicknav.mn.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/identity.css" />
+	<link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 	<link rel="stylesheet" href="~/css/site.css" />
+	<link rel="stylesheet" href="~/css/toast.css" />
 </head>
 <body>
 	<header>
@@ -45,12 +54,24 @@
 						</li>
 						<li class="nav-item"><a class="nav-link" asp-controller="Fridge" asp-action="Index">Fridge</a></li>
 						<li class="nav-item"><a class="nav-link" asp-controller="Profile" asp-action="Index">Profile</a></li>
+						@if (User.Identity.IsAuthenticated && (User.IsInRole("Admin") || User.IsInRole("Moderator")))
+						{
+							<li class="nav-item">
+								<a class="nav-link" href="/admin/dashboard" title="Admin Panel">
+									<i class="bi bi-shield-lock-fill"></i>
+									<span class="d-none d-lg-inline">Admin</span>
+								</a>
+							</li>
+						}
 					</ul>
 					<form class="d-flex me-2" method="get" asp-controller="Search" asp-action="Results">
 					    <input class="form-control me-2" type="search" name="query" placeholder="Tìm công thức hoặc nguyên liệu..." aria-label="Search">
 					    <button class="btn btn-outline-success" type="submit">Tìm</button>
 					</form>
 					<div class="d-flex">
+						<button id="themeToggle" class="btn btn-outline-secondary me-2" type="button" title="Toggle theme" aria-label="Toggle theme" style="display:flex;align-items:center;gap:6px;">
+							<span id="themeIcon" aria-hidden="true"></span>
+						</button>
 						<partial name="_LoginPartial" />
 					</div>
 				</div>
@@ -74,6 +95,73 @@
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 	<script src="~/js/site.js"></script>
+	<script src="~/js/toast.js"></script>
+	<script>
+			(function() {
+			var COOKIE = 'fv_theme';
+				var LS = 'fv_theme';
+			function getCookie(name){
+				var m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'));
+				return m ? decodeURIComponent(m[1]) : null;
+			}
+			function setCookie(name, value){
+				document.cookie = name + '=' + encodeURIComponent(value) + '; path=/; max-age=' + (60*60*24*30);
+			}
+				function isValid(t){ return t==='light'||t==='dark'||t==='auto'; }
+			function applyTheme(t){
+				if(t==='auto'){
+					var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+					document.documentElement.setAttribute('data-bs-theme', prefersDark ? 'dark' : 'light');
+					updateIcon(prefersDark ? 'dark' : 'light');
+				} else {
+					document.documentElement.setAttribute('data-bs-theme', t);
+					updateIcon(t);
+				}
+			}
+			function current(){
+					var t = localStorage.getItem(LS) || getCookie(COOKIE) || document.documentElement.getAttribute('data-bs-theme') || 'auto';
+				return isValid(t) ? t : 'auto';
+			}
+			function next(t){ return t==='auto' ? 'light' : (t==='light' ? 'dark' : 'auto'); }
+			function updateIcon(t){
+				var el = document.getElementById('themeIcon');
+				if(!el) return;
+				if(t==='light') el.innerHTML = '\u2600\ufe0f'; // sun
+				else if(t==='dark') el.innerHTML = '\ud83c\udf19'; // moon
+				else el.innerHTML = '\u263c'; // auto
+			}
+				document.addEventListener('DOMContentLoaded', function(){
+				var t = current();
+				applyTheme(t);
+					if (t==='auto' && window.matchMedia) {
+						var mq = window.matchMedia('(prefers-color-scheme: dark)');
+						mq.addEventListener ? mq.addEventListener('change', function(){ applyTheme('auto'); }) : mq.addListener(function(){ applyTheme('auto'); });
+					}
+				var btn = document.getElementById('themeToggle');
+				if(btn){
+					btn.addEventListener('click', function(){
+							var t = next(current());
+							setCookie(COOKIE, t);
+							try { localStorage.setItem(LS, t); } catch(e) {}
+							applyTheme(t);
+							// try persist to server (if signed in)
+							fetch('/theme/set?theme=' + encodeURIComponent(t), { method: 'POST', credentials: 'same-origin' }).catch(function(){});
+					});
+				}
+			});
+		})();
+	</script>
 	@RenderSection("Scripts", required: false)
 </body>
+<script>
+  (function() {
+    try {
+      var meta = document.querySelector('meta[name="user-theme"]');
+      var t = meta ? meta.getAttribute('content') : null;
+      if (t === 'light' || t === 'dark' || t === 'auto') {
+        document.documentElement.setAttribute('data-bs-theme', t);
+      }
+    } catch (e) { }
+  })();
+</script>
 </html>

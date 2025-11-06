@@ -382,7 +382,8 @@ body {
 }
 
 .footer__widget h6 {
-    color: white;
+/*    color: white;*/
+    color:black;
     font-weight: 700;
     margin-bottom: 20px;
     font-size: 1.2rem;
@@ -415,7 +416,8 @@ body {
     }
 
         .footer__widget ul li a {
-            color: #bdc3c7;
+/*            color: #bdc3c7;*/
+            color:black;
             text-decoration: none;
             transition: var(--transition);
             position: relative;

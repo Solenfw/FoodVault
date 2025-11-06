@@ -38,6 +38,14 @@ public partial class FoodVaultDbContext : IdentityDbContext<User>
 
     public virtual DbSet<Tag> Tags { get; set; }
 
+    public virtual DbSet<UserPreferences> UserPreferences { get; set; }
+
+    public virtual DbSet<UserActivity> UserActivities { get; set; }
+
+    public virtual DbSet<Report> Reports { get; set; }
+
+    public virtual DbSet<SystemSetting> SystemSettings { get; set; }
+
 
 
 
@@ -163,6 +171,8 @@ public partial class FoodVaultDbContext : IdentityDbContext<User>
             entity.Property(e => e.Name)
                 .HasMaxLength(450)
                 .HasColumnName("name");
+            entity.Property(e => e.ImageUrl)
+                .HasColumnName("image_url");
         });
 
         // ProfileUser removed: properties merged into Identity User
@@ -211,9 +221,9 @@ public partial class FoodVaultDbContext : IdentityDbContext<User>
 
             entity.HasIndex(e => e.UserId, "idx_recipes_user_id");
             
-            entity.Property(e => e.ImageUrl)    
-            .HasMaxLength(500)    
-            .HasColumnName("image_url");
+            entity.Property(e => e.ImageUrl)
+                .HasMaxLength(500)
+                .HasColumnName("image_url");
             entity.Property(e => e.Id)
                 .HasMaxLength(450)
                 .HasColumnName("id");
@@ -235,6 +245,7 @@ public partial class FoodVaultDbContext : IdentityDbContext<User>
             entity.Property(e => e.UserId)
                 .HasMaxLength(450)
                 .HasColumnName("user_id");
+            // ImageUrlsJson removed: we keep only ImageUrl
 
             entity.HasOne(d => d.User).WithMany(p => p.Recipes)
                 .HasForeignKey(d => d.UserId)
@@ -326,6 +337,7 @@ public partial class FoodVaultDbContext : IdentityDbContext<User>
                 .HasMaxLength(450)
                 .HasColumnName("recipe_id");
             entity.Property(e => e.StepNumber).HasColumnName("step_number");
+            entity.Property(e => e.ImageUrl).HasColumnName("image_url");
 
             entity.HasOne(d => d.Recipe).WithMany(p => p.Steps)
                 .HasForeignKey(d => d.RecipeId)
@@ -348,7 +360,87 @@ public partial class FoodVaultDbContext : IdentityDbContext<User>
                 .HasColumnName("name");
         });
 
+        modelBuilder.Entity<UserPreferences>(entity =>
+        {
+            entity.ToTable("user_preferences");
 
+            entity.HasKey(e => e.Id).HasName("PK_user_preferences");
+
+            entity.Property(e => e.Id)
+                .HasMaxLength(450)
+                .HasColumnName("id");
+
+            entity.Property(e => e.UserId)
+                .HasMaxLength(450)
+                .HasColumnName("user_id");
+
+            entity.Property(e => e.Theme)
+                .HasMaxLength(20)
+                .HasColumnName("theme");
+
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnName("updated_at");
+
+            entity.HasIndex(e => e.UserId, "uq_user_preferences_user_id").IsUnique();
+
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .HasConstraintName("FK_user_preferences_user")
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<UserActivity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.ToTable("user_activities");
+
+            entity.Property(e => e.Id).HasMaxLength(450).HasColumnName("id");
+            entity.Property(e => e.UserId).HasMaxLength(450).HasColumnName("user_id");
+            entity.Property(e => e.Action).HasMaxLength(100).HasColumnName("action");
+            entity.Property(e => e.IpAddress).HasMaxLength(50).HasColumnName("ip_address");
+            entity.Property(e => e.UserAgent).HasMaxLength(500).HasColumnName("user_agent");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())").HasColumnName("created_at");
+
+            entity.HasOne(d => d.User).WithMany()
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_user_activities_user");
+        });
+
+        modelBuilder.Entity<Report>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.ToTable("reports");
+
+            entity.Property(e => e.Id).HasMaxLength(450).HasColumnName("id");
+            entity.Property(e => e.ReporterId).HasMaxLength(450).HasColumnName("reporter_id");
+            entity.Property(e => e.TargetType).HasMaxLength(50).HasColumnName("target_type");
+            entity.Property(e => e.TargetId).HasMaxLength(450).HasColumnName("target_id");
+            entity.Property(e => e.Reason).HasMaxLength(500).HasColumnName("reason");
+            entity.Property(e => e.Status).HasMaxLength(50).HasColumnName("status");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())").HasColumnName("created_at");
+            entity.Property(e => e.ResolvedAt).HasColumnName("resolved_at");
+            entity.Property(e => e.ResolvedBy).HasMaxLength(450).HasColumnName("resolved_by");
+
+            entity.HasOne(d => d.Reporter).WithMany()
+                .HasForeignKey(d => d.ReporterId)
+                .HasConstraintName("FK_reports_reporter");
+
+            entity.HasOne(d => d.Resolver).WithMany()
+                .HasForeignKey(d => d.ResolvedBy)
+                .HasConstraintName("FK_reports_resolver");
+        });
+
+        modelBuilder.Entity<SystemSetting>(entity =>
+        {
+            entity.HasKey(e => e.Key);
+            entity.ToTable("system_settings");
+
+            entity.Property(e => e.Key).HasMaxLength(100).HasColumnName("key");
+            entity.Property(e => e.Value).HasMaxLength(1000).HasColumnName("value");
+            entity.Property(e => e.Description).HasMaxLength(500).HasColumnName("description");
+            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())").HasColumnName("updated_at");
+        });
 
         OnModelCreatingPartial(modelBuilder);
     }

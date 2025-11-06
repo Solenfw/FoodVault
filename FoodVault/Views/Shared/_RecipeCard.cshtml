@@ -30,7 +30,14 @@
 			</div>
 		</div>
 		<div class="card-footer bg-white border-0 pt-0">
-			<a class="btn btn-primary w-100" asp-controller="Recipes" asp-action="Details" asp-route-id="@Model.Id">View</a>
+			@if (!string.IsNullOrEmpty(Model.Id))
+			{
+				<a class="btn btn-primary w-100" asp-controller="Recipe" asp-action="Details" asp-route-id="@Model.Id">View</a>
+			}
+			else
+			{
+				<span class="btn btn-primary w-100 disabled">View</span>
+			}
 		</div>
 	</div>
 </div>

@@ -19,6 +19,8 @@ public partial class Ingredient
 
     public double? DefaultCarbs { get; set; }
 
+    public string? ImageUrl { get; set; }
+
     public virtual ICollection<FridgeIngredient> FridgeIngredients { get; set; } = new List<FridgeIngredient>();
 
     public virtual ICollection<RecipeIngredient> RecipeIngredients { get; set; } = new List<RecipeIngredient>();

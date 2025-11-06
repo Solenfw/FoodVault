@@ -1,0 +1,74 @@
+@model FoodVault.Models.ViewModels.RecipeDetailsViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var url = Context?.Request?.Scheme + "://" + Context?.Request?.Host + Url.Action("Details", "Recipe", new { id = Model.Id });
+    var qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=" + System.Net.WebUtility.UrlEncode(url);
+}
+<link rel="stylesheet" href="~/css/print.css" />
+
+<div class="container my-3">
+    <div class="d-flex justify-content-between align-items-start no-print">
+        <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@Model.Id">← Back</a>
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Print</button>
+    </div>
+
+    <h1 class="mt-2">@Model.Title</h1>
+    <p class="text-muted">Servings: @Model.Servings · Prep: @Model.PrepTimeMinutes min · Cook: @Model.CookTimeMinutes min</p>
+
+    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+    {
+        <img src="@Model.ImageUrl" alt="@Model.Title" class="img-fluid mb-3 avoid-break" />
+    }
+
+    <div class="row">
+        <div class="col-md-8">
+            <h3>Steps</h3>
+            <ol>
+            @foreach (var s in Model.Steps)
+            {
+                <li class="mb-2">@s.Instruction</li>
+            }
+            </ol>
+        </div>
+        <div class="col-md-4">
+            <h3>Ingredients</h3>
+            <ul class="list-unstyled">
+            @foreach (var i in Model.Ingredients)
+            {
+                <li class="mb-1">
+                    <input type="checkbox" style="margin-right:8px" />
+                    <span>@i.IngredientName</span>
+                    @if (i.Quantity != null)
+                    {
+                        <span> - @i.Quantity @i.Unit</span>
+                    }
+                </li>
+            }
+            </ul>
+
+            <h3 class="mt-4">Nutrition</h3>
+            <ul class="list-unstyled">
+                <li>Total Calories: @Math.Round(Model.TotalCalories ?? 0, 1)</li>
+                <li>Protein: @Math.Round(Model.TotalProtein ?? 0, 1) g</li>
+                <li>Fat: @Math.Round(Model.TotalFat ?? 0, 1) g</li>
+                <li>Carbs: @Math.Round(Model.TotalCarbs ?? 0, 1) g</li>
+            </ul>
+
+            <div class="mt-4">
+                <small class="text-muted">URL: <a href="@url">@url</a></small>
+                <div class="mt-2">
+                    <img src="@qrUrl" alt="QR" width="140" height="140" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Description))
+    {
+        <div class="page-break"></div>
+        <h3>Description</h3>
+        <p>@Model.Description</p>
+    }
+</div>
+
+

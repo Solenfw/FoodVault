@@ -22,8 +22,15 @@ else
     foreach (var fridge in Model)
     {
         <div class="card my-3">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <strong>@fridge.Name</strong>
+                <form asp-action="DeleteFridge" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="fridgeId" value="@fridge.Id" />
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa tủ lạnh này? Tất cả nguyên liệu trong tủ lạnh sẽ bị xóa.')">
+                        🗑️ Xóa tủ lạnh
+                    </button>
+                </form>
             </div>
             <div class="card-body p-2">
                 @if (fridge.Ingredients.Count == 0)
@@ -50,8 +57,13 @@ else
                         <tbody>
                         @foreach (var ingr in fridge.Ingredients)
                         {
-                            bool isExpiring = ingr.ExpirationDate != null && ingr.ExpirationDate <= DateOnly.FromDateTime(DateTime.UtcNow).AddDays(3);
-                            <tr class="@(isExpiring ? "table-danger" : null)">
+
+                            bool hasDate = ingr.ExpirationDate != null;
+                            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                            bool isExpired = hasDate && ingr.ExpirationDate < today;
+                            bool isSoon = hasDate && !isExpired && ingr.ExpirationDate <= today.AddDays(3);
+                            <tr class="@(isExpired ? "table-danger" : isSoon ? "table-warning" : null)">
+
                                 <td>@ingr.IngredientName</td>
                                 <td>@ingr.Quantity</td>
                                 <td>@ingr.Unit</td>
@@ -59,9 +71,13 @@ else
                                     @if (ingr.ExpirationDate != null)
                                     {
                                         <span>@ingr.ExpirationDate.Value.ToString("dd/MM/yyyy")</span>
-                                        @if (isExpiring)
+                                        @if (isExpired)
                                         {
-                                            <span class="badge bg-danger ms-2">Sắp hết hạn!</span>
+                                            <span class="badge bg-danger ms-2">Hết hạn!</span>
+                                        }
+                                        else if (isSoon)
+                                        {
+                                            <span class="badge bg-warning text-dark ms-2">Sắp hết hạn!</span>
                                         }
                                     } else {<span>-</span>}
                                 </td>
@@ -71,6 +87,7 @@ else
                                 <td>@Math.Round(ingr.Carbs ?? 0, 2)</td>
                                 <td>
                                     <form asp-action="RemoveItem" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
                                         <input type="hidden" name="FridgeIngredientId" value="@ingr.Id" />
                                         <button type="submit" class="btn btn-sm btn-link text-danger" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa nguyên liệu này không?')">
                                             <i class="fa fa-trash-o"></i> 🗑
@@ -82,17 +99,12 @@ else
                         </tbody>
                     </table>
                 }
-                <!-- Form thêm nguyên liệu mới, demo đơn giản -->
-                <form asp-action="AddItem" method="post" class="row row-cols-lg-auto align-items-center mt-3">
+                <!-- Form thêm nguyên liệu mới -->
+                <form asp-action="AddItem" method="post" class="row row-cols-lg-auto align-items-center mt-3 g-2">
+                    @Html.AntiForgeryToken()
                     <input type="hidden" name="FridgeId" value="@fridge.Id" />
                     <div class="col-4">
-                        <select name="IngredientId" class="form-select form-select-sm" required>
-                            <option value="" disabled selected>- Chọn nguyên liệu -</option>
-                            @foreach (var ingredient in (IEnumerable<FoodVault.Models.Entities.Ingredient>)ViewBag.AllIngredients)
-                            {
-                                <option value="@ingredient.Id">@ingredient.Name</option>
-                            }
-                        </select>
+                        <input name="IngredientName" type="text" class="form-control form-control-sm" placeholder="Tên nguyên liệu (ví dụ: Thịt bò, Rau cải...)" required />
                     </div>
                     <div class="col-2">
                         <input name="Quantity" type="number" step="any" class="form-control form-control-sm" placeholder="Số lượng" required />
@@ -100,8 +112,11 @@ else
                     <div class="col-2">
                         <input name="Unit" class="form-control form-control-sm" placeholder="Đơn vị" />
                     </div>
+                    <div class="col-2">
+                        <input name="DaysToExpire" type="number" min="1" class="form-control form-control-sm" placeholder="Số ngày dùng" />
+                    </div>
                     <div class="col-3">
-                        <input name="ExpirationDate" type="date" class="form-control form-control-sm" />
+                        <input name="ExpirationDate" type="date" class="form-control form-control-sm" placeholder="Hoặc chọn ngày hết hạn" />
                     </div>
                     <div class="col">
                         <button class="btn btn-sm btn-success" type="submit">Thêm nguyên liệu</button>

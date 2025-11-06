@@ -13,5 +13,7 @@ public partial class Step
 
     public string Instruction { get; set; } = null!;
 
+    public string? ImageUrl { get; set; }
+
     public virtual Recipe Recipe { get; set; } = null!;
 }

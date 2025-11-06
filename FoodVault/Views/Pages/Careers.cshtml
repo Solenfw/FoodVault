@@ -1,0 +1,43 @@
+@model FoodVault.Models.ViewModels.CareerApplicationViewModel
+@{
+    ViewData["Title"] = "Careers";
+}
+<partial name="~/Views/Shared/_Messages.cshtml" />
+<h1>Careers</h1>
+<p>Gia nhập đội ngũ FoodVault! Hãy gửi thông tin ứng tuyển của bạn.</p>
+<form asp-action="Careers" method="post" class="mt-3">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3">
+        <label asp-for="FullName" class="form-label"></label>
+        <input asp-for="FullName" class="form-control" />
+        <span asp-validation-for="FullName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Phone" class="form-label"></label>
+        <input asp-for="Phone" class="form-control" />
+        <span asp-validation-for="Phone" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Position" class="form-label"></label>
+        <input asp-for="Position" class="form-control" placeholder="Vị trí mong muốn" />
+        <span asp-validation-for="Position" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="CoverLetter" class="form-label"></label>
+        <textarea asp-for="CoverLetter" class="form-control" rows="6" placeholder="Thư ứng tuyển (tùy chọn)"></textarea>
+        <span asp-validation-for="CoverLetter" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Gửi ứng tuyển</button>
+</form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}
+
+

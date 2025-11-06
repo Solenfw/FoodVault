@@ -1,0 +1,149 @@
+@model List<FoodVault.Areas.Admin.ViewModels.ReportListViewModel>
+@{
+    ViewData["Title"] = "Quản lý Báo cáo";
+    Layout = "_AdminLayout";
+}
+
+<div class="content-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1>Quản lý Báo cáo</h1>
+            <p class="text-muted">Danh sách tất cả báo cáo vi phạm trong hệ thống</p>
+        </div>
+        @if (ViewBag.PendingCount > 0)
+        {
+            <div>
+                <span class="badge bg-danger fs-6">@ViewBag.PendingCount báo cáo đang chờ xử lý</span>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <select name="status" class="form-select">
+                    <option value="All" selected="@(ViewBag.Status == "All")">Tất cả</option>
+                    <option value="Pending" selected="@(ViewBag.Status == "Pending")">Chờ xử lý</option>
+                    <option value="Resolved" selected="@(ViewBag.Status == "Resolved")">Đã giải quyết</option>
+                    <option value="Dismissed" selected="@(ViewBag.Status == "Dismissed")">Đã bỏ qua</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-filter me-2"></i>Lọc
+                </button>
+            </div>
+            <div class="col-md-3">
+                <a href="/admin/reports" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Reset
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Reports Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title m-0">Tổng cộng: @ViewBag.TotalReports reports</h5>
+    </div>
+    <div class="card-body">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Người báo cáo</th>
+                            <th>Loại đối tượng</th>
+                            <th>Đối tượng bị báo cáo</th>
+                            <th>Lý do</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var report in Model)
+                        {
+                            <tr>
+                                <td>@report.ReporterName</td>
+                                <td>
+                                    <span class="badge bg-info">@report.TargetType</span>
+                                </td>
+                                <td>
+                                    <small>@report.TargetName</small>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(report.Reason))
+                                    {
+                                        <span title="@report.Reason">
+                                            @(report.Reason.Length > 50 ? report.Reason.Substring(0, 50) + "..." : report.Reason)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">N/A</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (report.Status == "Pending")
+                                    {
+                                        <span class="badge bg-warning">Chờ xử lý</span>
+                                    }
+                                    else if (report.Status == "Resolved")
+                                    {
+                                        <span class="badge bg-success">Đã giải quyết</span>
+                                    }
+                                    else if (report.Status == "Dismissed")
+                                    {
+                                        <span class="badge bg-secondary">Đã bỏ qua</span>
+                                    }
+                                </td>
+                                <td>@report.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/admin/reports/details/@report.Id" class="btn btn-outline-primary" title="Xem chi tiết">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <form method="post" action="/admin/reports/delete/@report.Id" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa báo cáo này?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-danger" title="Xóa">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (ViewBag.TotalPages > 1)
+            {
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == ViewBag.Page ? "active" : "")">
+                                <a class="page-link" href="/admin/reports?page=@i&status=@ViewBag.Status">@i</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        }
+        else
+        {
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                <p class="mt-3">Không tìm thấy báo cáo nào</p>
+            </div>
+        }
+    </div>
+</div>
+
