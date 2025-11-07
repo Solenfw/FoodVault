@@ -48,3 +48,4 @@ wwwroot/uploads/
 # =====================
 .env
 appsettings.*.json    # ignore sensitive env-specific settings
+appsettings.json
