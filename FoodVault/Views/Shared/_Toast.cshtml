@@ -1,0 +1,21 @@
+@{
+	var success = TempData["Success"] as string;
+	var error = TempData["Error"] as string;
+	var info = TempData["Info"] as string;
+}
+<div id="toastRegion" class="fv-toasts"></div>
+@if (!string.IsNullOrWhiteSpace(success))
+{
+	<script>window.toast && toast.success(@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(success)));</script>
+}
+@if (!string.IsNullOrWhiteSpace(error))
+{
+	<script>window.toast && toast.error(@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(error)));</script>
+}
+@if (!string.IsNullOrWhiteSpace(info))
+{
+	<script>window.toast && toast.info(@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(info)));</script>
+}
+
+
+

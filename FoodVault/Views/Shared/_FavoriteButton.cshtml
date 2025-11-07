@@ -1,0 +1,14 @@
+@model FoodVault.Models.ViewModels.FavoriteButtonViewModel
+<form asp-controller="Favorites" asp-action="Toggle" method="post" class="d-inline">
+	<input type="hidden" name="recipeId" value="@Model.RecipeId" />
+	<button type="submit" class="btn btn-sm @((Model.IsFavorited ? "btn-outline-danger" : "btn-outline-secondary"))" title="Toggle favorite" aria-pressed="@Model.IsFavorited">
+		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill me-1 @((Model.IsFavorited ? "text-danger" : "text-secondary"))" viewBox="0 0 16 16">
+			<path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"/>
+		</svg>
+		<span>@(Model.IsFavorited ? "Favorited" : "Favorite")</span>
+	</button>
+	@Html.AntiForgeryToken()
+</form>
+
+
+

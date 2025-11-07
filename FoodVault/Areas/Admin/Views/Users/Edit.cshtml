@@ -1,0 +1,86 @@
+@model FoodVault.Areas.Admin.ViewModels.EditUserViewModel
+@{
+    ViewData["Title"] = "Sửa User: " + Model.UserName;
+    Layout = "_AdminLayout";
+}
+
+<div class="content-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1>Sửa User</h1>
+            <p class="text-muted">@Model.UserName</p>
+        </div>
+        <div>
+            <a href="/admin/users/details/@Model.Id" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Quay lại
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title m-0">Thông tin cơ bản</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-action="Edit">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="mb-3">
+                        <label asp-for="UserName" class="form-label"></label>
+                        <input asp-for="UserName" class="form-control" />
+                        <span asp-validation-for="UserName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" type="email" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PhoneNumber" class="form-label"></label>
+                        <input asp-for="PhoneNumber" class="form-control" type="tel" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" asp-for="EmailConfirmed" class="form-check-input" />
+                        <label asp-for="EmailConfirmed" class="form-check-label">Email đã xác nhận</label>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" asp-for="LockoutEnabled" class="form-check-input" />
+                        <label asp-for="LockoutEnabled" class="form-check-label">Kích hoạt khóa tài khoản</label>
+                    </div>
+
+                    <hr class="my-4" />
+                    <h5>Roles</h5>
+                    @foreach (var role in Model.AvailableRoles)
+                    {
+                        <div class="form-check mb-2">
+                            <input type="checkbox" name="SelectedRoles" value="@role" class="form-check-input" 
+                                   @(Model.SelectedRoles.Contains(role) ? "checked" : "") />
+                            <label class="form-check-label">@role</label>
+                        </div>
+                    }
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Lưu thay đổi
+                        </button>
+                        <a href="/admin/users/details/@Model.Id" class="btn btn-outline-secondary">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

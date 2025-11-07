@@ -1,0 +1,13 @@
+@* Usage: <partial name="_LoadingSpinner" model="new { Text = \"Loading...\" }" /> *@
+@model dynamic
+<div class="d-flex align-items-center gap-2" role="status" aria-live="polite">
+	<div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+	<span class="visually-hidden">Loading...</span>
+	@if (Model?.Text != null)
+	{
+		<span>@Model.Text</span>
+	}
+</div>
+
+
+

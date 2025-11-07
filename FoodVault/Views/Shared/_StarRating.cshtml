@@ -1,0 +1,36 @@
+@model FoodVault.Models.ViewModels.StarRatingViewModel
+@{
+	var rating = Model.Rating;
+	var max = Model.MaxStars;
+	var full = (int)System.Math.Floor(rating);
+	var half = (rating - full) >= 0.5 ? 1 : 0;
+	var empty = max - full - half;
+}
+<div class="d-inline-flex align-items-center" aria-label="Rating: @rating of @max">
+	@for (int i = 0; i < full; i++)
+	{
+		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#f5c518" viewBox="0 0 16 16" class="me-1">
+			<path d="M3.612 15.443 4.66 9.797.672 6.173l5.052-.737L8 0l2.276 5.436 5.052.737-3.988 3.624 1.048 5.646L8 12.347l-4.389 3.096z"/>
+		</svg>
+	}
+	@if (half == 1)
+	{
+		<span class="position-relative d-inline-block me-1" style="width:16px;height:16px;">
+			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#e1e1e1" viewBox="0 0 16 16" style="position:absolute;top:0;left:0;">
+				<path d="M3.612 15.443 4.66 9.797.672 6.173l5.052-.737L8 0l2.276 5.436 5.052.737-3.988 3.624 1.048 5.646L8 12.347l-4.389 3.096z"/>
+			</svg>
+			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#f5c518" viewBox="0 0 16 16" style="position:absolute;top:0;left:0;clip-path:inset(0 50% 0 0);">
+				<path d="M3.612 15.443 4.66 9.797.672 6.173l5.052-.737L8 0l2.276 5.436 5.052.737-3.988 3.624 1.048 5.646L8 12.347l-4.389 3.096z"/>
+			</svg>
+		</span>
+	}
+	@for (int i = 0; i < empty; i++)
+	{
+		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#e1e1e1" viewBox="0 0 16 16" class="me-1">
+			<path d="M3.612 15.443 4.66 9.797.672 6.173l5.052-.737L8 0l2.276 5.436 5.052.737-3.988 3.624 1.048 5.646L8 12.347l-4.389 3.096z"/>
+		</svg>
+	}
+</div>
+
+
+

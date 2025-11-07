@@ -1,0 +1,342 @@
+@model FoodVault.Areas.Admin.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-content">
+    <!-- Page Header -->
+    <div class="content-header mb-4">
+        <h1>Dashboard</h1>
+        <p class="text-muted">Tổng quan về hệ thống FoodVault</p>
+    </div>
+
+    <!-- SECTION 1: Stats Cards Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <partial name="_StatsCard" model='new FoodVault.Areas.Admin.ViewModels.StatsCardViewModel { Icon = "bi-people", Title = "Tổng Users", Value = Model.TotalUsers.ToString(), Change = Model.NewUsersToday, ChangeLabel = "Mới hôm nay", Type = "primary" }' />
+        </div>
+        <div class="col-md-3">
+            <partial name="_StatsCard" model='new FoodVault.Areas.Admin.ViewModels.StatsCardViewModel { Icon = "bi-book", Title = "Tổng Recipes", Value = Model.TotalRecipes.ToString(), Change = Model.NewRecipesToday, ChangeLabel = "Mới hôm nay", Type = "success" }' />
+        </div>
+        <div class="col-md-3">
+            <partial name="_StatsCard" model='new FoodVault.Areas.Admin.ViewModels.StatsCardViewModel { Icon = "bi-chat-dots", Title = "Comments", Value = Model.TotalComments.ToString(), Change = 0, ChangeLabel = "", Type = "info" }' />
+        </div>
+        <div class="col-md-3">
+            <partial name="_StatsCard" model='new FoodVault.Areas.Admin.ViewModels.StatsCardViewModel { Icon = "bi-star-fill", Title = "Đánh giá TB", Value = Model.AverageRating.ToString("F1"), Change = 0, ChangeLabel = "", Type = "warning" }' />
+        </div>
+    </div>
+
+    <!-- SECTION 4: Alerts (show first if needed) -->
+    @if (Model.PendingReports > 0)
+    {
+        <div class="alert alert-warning d-flex align-items-center justify-content-between mb-4" role="alert">
+            <div>
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Có @Model.PendingReports báo cáo đang chờ xử lý.</strong>
+            </div>
+            <a href="/admin/reports" class="btn btn-warning btn-sm">Xem ngay</a>
+        </div>
+    }
+
+    <!-- SECTION 2: Charts Row -->
+    <div class="row g-3 mb-4">
+        <!-- Left: User Growth Line Chart -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title m-0">
+                        <i class="bi bi-graph-up me-2"></i>
+                        Tăng trưởng người dùng
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="userGrowthChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: System Health Progress Bars -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title m-0">
+                        <i class="bi bi-activity me-2"></i>
+                        Sức khỏe hệ thống
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- CPU Usage -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">CPU</span>
+                            <span class="text-muted"><span id="cpu-value">0</span>%</span>
+                        </div>
+                        <div class="progress" style="height: 20px;">
+                            <div id="cpu-progress" class="progress-bar bg-danger" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Memory Usage -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Memory</span>
+                            <span class="text-muted"><span id="memory-value">0</span>%</span>
+                        </div>
+                        <div class="progress" style="height: 20px;">
+                            <div id="memory-progress" class="progress-bar bg-warning" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Disk Usage -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Disk</span>
+                            <span class="text-muted"><span id="disk-value">0</span>%</span>
+                        </div>
+                        <div class="progress" style="height: 20px;">
+                            <div id="disk-progress" class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <small class="text-muted">
+                        <i class="bi bi-arrow-clockwise me-1"></i>
+                        Cập nhật mỗi 30 giây
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 3: Tables Row -->
+    <div class="row g-3 mb-4">
+        <!-- Left: Popular Recipes Table -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title m-0">
+                        <i class="bi bi-fire me-2"></i>
+                        Công thức phổ biến
+                    </h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.PopularRecipes != null && Model.PopularRecipes.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Công thức</th>
+                                        <th class="text-center">Yêu thích</th>
+                                        <th class="text-center">Đánh giá</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int rank = 1;
+                                    }
+                                    @foreach (var recipe in Model.PopularRecipes.Take(10))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <span class="badge badge-primary">@rank</span>
+                                            </td>
+                                            <td>
+                                                <a href="/recipe/details/@recipe.RecipeId" class="text-decoration-none">
+                                                    @recipe.Title
+                                                </a>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge badge-success">@recipe.FavoriteCount</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge badge-warning">
+                                                    <i class="bi bi-star-fill me-1"></i>
+                                                    @recipe.AvgRating.ToString("F1")
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        rank++;
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                            <p class="mt-2">Chưa có dữ liệu</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Recent Activities Timeline -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title m-0">
+                        <i class="bi bi-clock-history me-2"></i>
+                        Hoạt động gần đây
+                    </h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentActivities != null && Model.RecentActivities.Any())
+                    {
+                        <div class="activity-timeline">
+                            @foreach (var activity in Model.RecentActivities.Take(10))
+                            {
+                                <div class="activity-item mb-3 pb-3 border-bottom">
+                                    <div class="d-flex align-items-start">
+                                        <div class="activity-icon me-3">
+                                            <i class="bi bi-circle-fill text-primary" style="font-size: 0.5rem;"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                                <strong>@activity.Username</strong>
+                                                <small class="text-muted">@activity.Timestamp.ToString("HH:mm dd/MM")</small>
+                                            </div>
+                                            <div class="mb-1">
+                                                <span class="badge badge-info">@activity.Action</span>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(activity.Details))
+                                            {
+                                                <small class="text-muted">@activity.Details</small>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                            <p class="mt-2">Chưa có hoạt động</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Initialize User Growth Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch user growth data
+            fetch('/admin/dashboard/getusergrowth?days=30')
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('userGrowthChart');
+                    if (ctx) {
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: data.labels || [],
+                                datasets: [{
+                                    label: 'Số người dùng mới',
+                                    data: data.data || [],
+                                    borderColor: 'rgb(79, 70, 229)',
+                                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                                    tension: 0.4,
+                                    fill: true,
+                                    pointRadius: 4,
+                                    pointHoverRadius: 6,
+                                    pointBackgroundColor: 'rgb(79, 70, 229)',
+                                    pointBorderColor: '#fff',
+                                    pointBorderWidth: 2
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                        titleColor: '#e2e8f0',
+                                        bodyColor: '#cbd5e1',
+                                        borderColor: '#334155',
+                                        borderWidth: 1
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            color: '#94a3b8',
+                                            stepSize: 1
+                                        },
+                                        grid: {
+                                            color: 'rgba(51, 65, 85, 0.3)'
+                                        }
+                                    },
+                                    x: {
+                                        ticks: {
+                                            color: '#94a3b8'
+                                        },
+                                        grid: {
+                                            color: 'rgba(51, 65, 85, 0.3)'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading user growth data:', error);
+                });
+
+            // Load system health data
+            function loadSystemHealth() {
+                fetch('/admin/dashboard/getsystemhealth')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Update CPU
+                        const cpuValue = Math.round(data.cpuUsage || 0);
+                        document.getElementById('cpu-value').textContent = cpuValue;
+                        const cpuProgress = document.getElementById('cpu-progress');
+                        cpuProgress.style.width = cpuValue + '%';
+                        cpuProgress.textContent = cpuValue + '%';
+                        cpuProgress.className = 'progress-bar ' + (cpuValue > 80 ? 'bg-danger' : cpuValue > 50 ? 'bg-warning' : 'bg-success');
+
+                        // Update Memory
+                        const memoryValue = Math.round(data.memoryUsage || 0);
+                        document.getElementById('memory-value').textContent = memoryValue;
+                        const memoryProgress = document.getElementById('memory-progress');
+                        memoryProgress.style.width = memoryValue + '%';
+                        memoryProgress.textContent = memoryValue + '%';
+                        memoryProgress.className = 'progress-bar ' + (memoryValue > 80 ? 'bg-danger' : memoryValue > 50 ? 'bg-warning' : 'bg-success');
+
+                        // Update Disk
+                        const diskValue = Math.round(data.diskUsage || 0);
+                        document.getElementById('disk-value').textContent = diskValue;
+                        const diskProgress = document.getElementById('disk-progress');
+                        diskProgress.style.width = diskValue + '%';
+                        diskProgress.textContent = diskValue + '%';
+                        diskProgress.className = 'progress-bar ' + (diskValue > 80 ? 'bg-danger' : diskValue > 50 ? 'bg-warning' : 'bg-success');
+                    })
+                    .catch(error => {
+                        console.error('Error loading system health:', error);
+                    });
+            }
+
+            // Load system health immediately
+            loadSystemHealth();
+
+            // Update system health every 30 seconds
+            setInterval(loadSystemHealth, 30000);
+        });
+    </script>
+}
+

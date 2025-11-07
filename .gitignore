@@ -1,15 +1,50 @@
-# Visual Studio generated files
-*.suo
-*.user
-*.sln.docstates
+# =====================
+# ASP.NET / .NET Core
+# =====================
+
+# Build directories
+bin/
+obj/
+publish/
 
 # User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio / Rider / IDE
 .vs/
+*.idea/
+*.vscode/
+*.log
 
-# Build results
-[Bb]in/
-[Oo]bj/
+# OS files
+.DS_Store
+Thumbs.db
 
-# Other files
-*.csproj.user
-*.cache
+# =====================
+# Entity Framework / Migrations
+# =====================
+Migrations/
+*.Snapshot.cs
+
+# Seed files (optional: if you want to ignore local JSON seeds)
+# seed.json
+
+# =====================
+# Node / frontend (if using npm for libs)
+# =====================
+node_modules/
+dist/
+
+# =====================
+# Uploaded files / temp media
+# =====================
+wwwroot/uploads/
+
+# =====================
+# Environment / config
+# =====================
+.env
+appsettings.*.json    # ignore sensitive env-specific settings

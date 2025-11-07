@@ -1,0 +1,171 @@
+@model FoodVault.Areas.Admin.ViewModels.RecipeApprovalDetailsViewModel
+@{
+    ViewData["Title"] = "Chi tiết Recipe: " + Model.Title;
+    Layout = "_AdminLayout";
+}
+
+<div class="content-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1>Chi tiết Recipe</h1>
+            <p class="text-muted">@Model.Title</p>
+        </div>
+        <div>
+            <a href="/admin/recipes" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Quay lại
+            </a>
+            <a href="/recipe/details/@Model.Id" class="btn btn-outline-info" target="_blank">
+                <i class="bi bi-box-arrow-up-right me-2"></i>Xem trên site
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" alt="@Model.Title" class="card-img-top" style="max-height: 400px; object-fit: cover;" />
+            }
+            <div class="card-body">
+                <h2>@Model.Title</h2>
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <p class="text-muted">@Model.Description</p>
+                }
+            </div>
+        </div>
+
+        <div class="row g-4">
+            @if (Model.Ingredients != null && Model.Ingredients.Any())
+            {
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title m-0">Nguyên liệu (@Model.Ingredients.Count)</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                @foreach (var ingredient in Model.Ingredients)
+                                {
+                                    <li class="list-group-item">@(ingredient ?? "N/A")</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.Steps != null && Model.Steps.Any())
+            {
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title m-0">Các bước (@Model.Steps.Count)</h5>
+                        </div>
+                        <div class="card-body">
+                            <ol class="list-group list-group-numbered">
+                                @foreach (var step in Model.Steps)
+                                {
+                                    <li class="list-group-item">@(step ?? "")</li>
+                                }
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title m-0">Thông tin</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-6">Tác giả:</dt>
+                    <dd class="col-sm-6">@Model.AuthorName</dd>
+
+                    <dt class="col-sm-6">Số suất:</dt>
+                    <dd class="col-sm-6">@(Model.Servings?.ToString() ?? "N/A")</dd>
+
+                    <dt class="col-sm-6">Thời gian chuẩn bị:</dt>
+                    <dd class="col-sm-6">@(Model.PrepTimeMinutes?.ToString() ?? "N/A") phút</dd>
+
+                    <dt class="col-sm-6">Thời gian nấu:</dt>
+                    <dd class="col-sm-6">@(Model.CookTimeMinutes?.ToString() ?? "N/A") phút</dd>
+
+                    <dt class="col-sm-6">Favorites:</dt>
+                    <dd class="col-sm-6"><span class="badge bg-warning">@Model.FavoriteCount</span></dd>
+
+                    <dt class="col-sm-6">Rating:</dt>
+                    <dd class="col-sm-6">
+                        <span class="badge bg-success">
+                            <i class="bi bi-star-fill me-1"></i>@Model.AvgRating.ToString("F1")
+                        </span>
+                        <small class="text-muted">(@Model.RatingCount reviews)</small>
+                    </dd>
+
+                    <dt class="col-sm-6">Ngày tạo:</dt>
+                    <dd class="col-sm-6">@(Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</dd>
+
+                    <dt class="col-sm-6">Cập nhật:</dt>
+                    <dd class="col-sm-6">@(Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title m-0">Hành động</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-action="Approve" asp-route-id="@Model.Id" class="mb-2">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-check-circle me-2"></i>Duyệt
+                    </button>
+                </form>
+
+                <button type="button" class="btn btn-danger w-100 mb-2" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                    <i class="bi bi-x-circle me-2"></i>Từ chối
+                </button>
+
+                <form method="post" asp-action="Delete" asp-route-id="@Model.Id" onsubmit="return confirm('Bạn có chắc chắn muốn xóa công thức này?');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger w-100">
+                        <i class="bi bi-trash me-2"></i>Xóa
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-action="Reject" asp-route-id="@Model.Id">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title">Từ chối công thức</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="rejectReason" class="form-label">Lý do từ chối:</label>
+                        <textarea name="reason" id="rejectReason" class="form-control" rows="3" placeholder="Nhập lý do từ chối..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Xác nhận từ chối</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

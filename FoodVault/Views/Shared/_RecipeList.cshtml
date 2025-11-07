@@ -1,0 +1,54 @@
+@model IEnumerable<FoodVault.Models.ViewModels.RecipeListItemViewModel>
+
+<div class="list-group">
+@foreach (var r in Model)
+{
+    <div class="list-group-item p-0 border-0">
+        <div class="swipe-item" data-recipe-id="@r.Id">
+            <div class="swipe-bg-left"><span>❤️ Add to favorites</span></div>
+            <div class="swipe-bg-right"><span>🗑️ Delete</span></div>
+            <div class="swipe-foreground list-group-item">
+                <div class="d-flex w-100 justify-content-between align-items-start">
+                    <div class="me-2 flex-grow-1">
+                        <a class="text-decoration-none" asp-controller="Recipe" asp-action="Details" asp-route-id="@r.Id">
+                            <h5 class="mb-1 d-inline">@r.Title</h5>
+                        </a>
+                        <small class="text-muted ms-2">@(r.UpdatedAt?.ToLocalTime().ToString("g"))</small>
+                        <p class="mb-1">@r.Description</p>
+                    </div>
+                    <div class="ms-2 text-nowrap">
+                        <a asp-controller="Recipe" asp-action="Edit" asp-route-id="@r.Id" class="btn btn-sm btn-outline-secondary me-1">Sửa</a>
+                        <form asp-controller="Recipe" asp-action="Delete" method="post" class="d-inline swipe-delete-form">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@r.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger d-none">Xóa</button>
+                        </form>
+                        <form asp-controller="Favorite" asp-action="Add" method="post" class="d-inline swipe-fav-form">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="recipeId" value="@r.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-success d-none">Fav</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

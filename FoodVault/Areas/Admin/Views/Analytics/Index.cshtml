@@ -1,0 +1,129 @@
+@model FoodVault.Areas.Admin.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Analytics";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-content">
+    <div class="admin-header">
+        <h1 class="admin-title">Analytics</h1>
+        <p class="admin-subtitle">Phân tích và thống kê hệ thống</p>
+    </div>
+
+    @if (ViewData["Error"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewData["Error"]
+        </div>
+    }
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <partial name="_StatsCard" model='new FoodVault.Areas.Admin.ViewModels.StatsCardViewModel { Icon = "bi-people", Title = "Tổng Users", Value = Model.TotalUsers.ToString(), Change = Model.NewUsersToday, ChangeLabel = "Mới hôm nay", Type = "primary" }' />
+        </div>
+        <div class="col-md-3">
+            <partial name="_StatsCard" model='new FoodVault.Areas.Admin.ViewModels.StatsCardViewModel { Icon = "bi-book", Title = "Tổng Recipes", Value = Model.TotalRecipes.ToString(), Change = Model.NewRecipesToday, ChangeLabel = "Mới hôm nay", Type = "success" }' />
+        </div>
+        <div class="col-md-3">
+            <partial name="_StatsCard" model='new FoodVault.Areas.Admin.ViewModels.StatsCardViewModel { Icon = "bi-chat-dots", Title = "Comments", Value = Model.TotalComments.ToString(), Change = 0, ChangeLabel = "", Type = "info" }' />
+        </div>
+        <div class="col-md-3">
+            <partial name="_StatsCard" model='new FoodVault.Areas.Admin.ViewModels.StatsCardViewModel { Icon = "bi-star-fill", Title = "Đánh giá TB", Value = Model.AverageRating.ToString("F1"), Change = 0, ChangeLabel = "", Type = "warning" }' />
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Tăng trưởng người dùng (30 ngày)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="userGrowthChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popular Recipes -->
+    @if (Model.PopularRecipes != null && Model.PopularRecipes.Any())
+    {
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Top công thức phổ biến</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Tên công thức</th>
+                                        <th>Lượt yêu thích</th>
+                                        <th>Đánh giá TB</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < Model.PopularRecipes.Count; i++)
+                                    {
+                                        var recipe = Model.PopularRecipes[i];
+                                        <tr>
+                                            <td>@(i + 1)</td>
+                                            <td>@recipe.Title</td>
+                                            <td>@recipe.FavoriteCount</td>
+                                            <td>@recipe.AvgRating.ToString("F2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load user growth chart
+            fetch('/admin/analytics/getusergrowth?days=30')
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('userGrowthChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Số lượng người dùng',
+                                data: data.data,
+                                borderColor: 'rgb(75, 192, 192)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading chart data:', error);
+                });
+        });
+    </script>
+}
+

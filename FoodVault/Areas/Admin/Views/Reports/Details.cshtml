@@ -1,0 +1,167 @@
+@model FoodVault.Areas.Admin.ViewModels.ReportDetailsViewModel
+@{
+    ViewData["Title"] = "Chi tiết Báo cáo";
+    Layout = "_AdminLayout";
+}
+
+<div class="content-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1>Chi tiết Báo cáo</h1>
+            <p class="text-muted">ID: @Model.Id</p>
+        </div>
+        <div>
+            <a href="/admin/reports" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Quay lại
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title m-0">Thông tin báo cáo</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">ID:</dt>
+                    <dd class="col-sm-9"><small class="text-muted">@Model.Id</small></dd>
+
+                    <dt class="col-sm-3">Người báo cáo:</dt>
+                    <dd class="col-sm-9">
+                        <strong>@Model.ReporterName</strong>
+                        <a href="/admin/users/details/@Model.ReporterId" class="btn btn-sm btn-outline-primary ms-2">
+                            <i class="bi bi-person"></i>Xem profile
+                        </a>
+                    </dd>
+
+                    <dt class="col-sm-3">Loại đối tượng:</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge bg-info">@Model.TargetType</span>
+                    </dd>
+
+                    <dt class="col-sm-3">Đối tượng bị báo cáo:</dt>
+                    <dd class="col-sm-9">
+                        <strong>@Model.TargetName</strong>
+                        @if (ViewBag.TargetLink != "#")
+                        {
+                            <a href="@ViewBag.TargetLink" class="btn btn-sm btn-outline-info ms-2" target="_blank">
+                                <i class="bi bi-box-arrow-up-right"></i>Xem
+                            </a>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">Lý do báo cáo:</dt>
+                    <dd class="col-sm-9">
+                        @if (!string.IsNullOrEmpty(Model.Reason))
+                        {
+                            <p class="mb-0">@Model.Reason</p>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Không có lý do</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">Trạng thái:</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.Status == "Pending")
+                        {
+                            <span class="badge bg-warning">Chờ xử lý</span>
+                        }
+                        else if (Model.Status == "Resolved")
+                        {
+                            <span class="badge bg-success">Đã giải quyết</span>
+                        }
+                        else if (Model.Status == "Dismissed")
+                        {
+                            <span class="badge bg-secondary">Đã bỏ qua</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">Ngày tạo:</dt>
+                    <dd class="col-sm-9">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                    @if (Model.ResolvedAt.HasValue)
+                    {
+                        <dt class="col-sm-3">Ngày giải quyết:</dt>
+                        <dd class="col-sm-9">
+                            @Model.ResolvedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                            @if (!string.IsNullOrEmpty(Model.ResolvedByName))
+                            {
+                                <span class="text-muted">bởi @Model.ResolvedByName</span>
+                            }
+                        </dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        @if (Model.Status == "Pending")
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title m-0">Hành động</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="/admin/reports/resolve/@Model.Id" class="mb-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="action" value="Resolve" />
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-check-circle me-2"></i>Giải quyết
+                        </button>
+                    </form>
+
+                    <form method="post" action="/admin/reports/resolve/@Model.Id">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="action" value="Dismiss" />
+                        <button type="submit" class="btn btn-secondary w-100" onclick="return confirm('Bạn có chắc chắn muốn bỏ qua báo cáo này?');">
+                            <i class="bi bi-x-circle me-2"></i>Bỏ qua
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title m-0">Trạng thái</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Status == "Resolved")
+                    {
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle me-2"></i>Báo cáo đã được giải quyết
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Báo cáo đã được bỏ qua
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title m-0">Xóa báo cáo</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="/admin/reports/delete/@Model.Id" onsubmit="return confirm('Bạn có chắc chắn muốn xóa báo cáo này?');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger w-100">
+                        <i class="bi bi-trash me-2"></i>Xóa báo cáo
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

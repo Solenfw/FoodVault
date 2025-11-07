@@ -1,0 +1,91 @@
+@model FoodVault.Areas.Admin.ViewModels.CreateIngredientViewModel
+@{
+    ViewData["Title"] = "Tạo Ingredient mới";
+    Layout = "_AdminLayout";
+}
+
+<div class="content-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1>Tạo Ingredient mới</h1>
+        </div>
+        <div>
+            <a href="/admin/ingredients" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Quay lại
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title m-0">Thông tin nguyên liệu</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-action="Create" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DefaultUnit" class="form-label">Đơn vị mặc định</label>
+                            <input asp-for="DefaultUnit" class="form-control" placeholder="Ví dụ: gram, ml, cup..." />
+                            <span asp-validation-for="DefaultUnit" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ImageUrl" class="form-label">URL ảnh (tùy chọn)</label>
+                            <input asp-for="ImageUrl" class="form-control" type="url" placeholder="https://..." />
+                            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+                    <h5>Thông tin dinh dưỡng (mỗi 100g/ml)</h5>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DefaultCalories" class="form-label">Calories (kcal)</label>
+                            <input asp-for="DefaultCalories" class="form-control" type="number" step="0.1" min="0" />
+                            <span asp-validation-for="DefaultCalories" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DefaultProtein" class="form-label">Protein (g)</label>
+                            <input asp-for="DefaultProtein" class="form-control" type="number" step="0.1" min="0" />
+                            <span asp-validation-for="DefaultProtein" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DefaultFat" class="form-label">Fat (g)</label>
+                            <input asp-for="DefaultFat" class="form-control" type="number" step="0.1" min="0" />
+                            <span asp-validation-for="DefaultFat" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DefaultCarbs" class="form-label">Carbs (g)</label>
+                            <input asp-for="DefaultCarbs" class="form-control" type="number" step="0.1" min="0" />
+                            <span asp-validation-for="DefaultCarbs" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Tạo mới
+                        </button>
+                        <a href="/admin/ingredients" class="btn btn-outline-secondary">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

@@ -1,0 +1,21 @@
+@model FoodVault.Models.ViewModels.SearchBoxViewModel
+@{
+	var m = Model;
+	if (m == null) { m = new FoodVault.Models.ViewModels.SearchBoxViewModel(); }
+	var action = m.Action ?? "Index";
+	var controller = m.Controller ?? "Search";
+	var placeholder = m.Placeholder ?? "Search recipes...";
+	var query = m.Query ?? "";
+}
+<form class="d-flex" action="@Url.Action(action, controller)" method="get" role="search">
+	<input class="form-control me-2" type="search" name="query" value="@query" placeholder="@placeholder" aria-label="Search" />
+	<button class="btn btn-outline-primary" type="submit">Search</button>
+</form>
+
+
+
+
+
+
+
+

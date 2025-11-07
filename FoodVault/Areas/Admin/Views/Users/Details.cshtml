@@ -1,0 +1,135 @@
+@model FoodVault.Areas.Admin.ViewModels.UserDetailsViewModel
+@{
+    ViewData["Title"] = "Chi tiết User: " + Model.UserName;
+    Layout = "_AdminLayout";
+}
+
+<div class="content-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1>Chi tiết User</h1>
+            <p class="text-muted">@Model.UserName</p>
+        </div>
+        <div>
+            <a href="/admin/users" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Quay lại
+            </a>
+            <a href="/admin/users/edit/@Model.Id" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Sửa
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- User Info Card -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title m-0">Thông tin cơ bản</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">ID:</dt>
+                    <dd class="col-sm-9"><small class="text-muted">@Model.Id</small></dd>
+
+                    <dt class="col-sm-3">Tên đăng nhập:</dt>
+                    <dd class="col-sm-9">@Model.UserName</dd>
+
+                    <dt class="col-sm-3">Email:</dt>
+                    <dd class="col-sm-9">
+                        @Model.Email
+                        @if (Model.EmailConfirmed)
+                        {
+                            <i class="bi bi-check-circle-fill text-success ms-1" title="Đã xác nhận"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-x-circle-fill text-danger ms-1" title="Chưa xác nhận"></i>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">Số điện thoại:</dt>
+                    <dd class="col-sm-9">@(Model.PhoneNumber ?? "N/A")</dd>
+
+                    <dt class="col-sm-3">Roles:</dt>
+                    <dd class="col-sm-9">
+                        @foreach (var role in Model.Roles)
+                        {
+                            <span class="badge bg-primary me-1">@role</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">Trạng thái:</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.LockoutEnabled && Model.LockoutEnd > DateTimeOffset.UtcNow)
+                        {
+                            <span class="badge bg-danger">Đã khóa (đến @Model.LockoutEnd?.ToString("dd/MM/yyyy HH:mm"))</span>
+                            <form method="post" action="/admin/users/unlock/@Model.Id" class="d-inline ms-2">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-success">Mở khóa</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Hoạt động</span>
+                            <form method="post" action="/admin/users/lock/@Model.Id" class="d-inline ms-2">
+                                @Html.AntiForgeryToken()
+                                <input type="number" name="days" value="7" min="1" max="365" class="form-control form-control-sm d-inline-block" style="width: 80px;" />
+                                <button type="submit" class="btn btn-sm btn-danger">Khóa</button>
+                            </form>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">Ngày tạo:</dt>
+                    <dd class="col-sm-9">@(Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Card -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title m-0">Thống kê</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>Recipes:</span>
+                        <span class="badge bg-info">@Model.RecipeCount</span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>Favorites:</span>
+                        <span class="badge bg-warning">@Model.FavoriteCount</span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>Ratings:</span>
+                        <span class="badge bg-success">@Model.RatingCount</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Card -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title m-0">Hành động</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="/admin/users/delete/@Model.Id" onsubmit="return confirm('Bạn có chắc chắn muốn xóa user này? Hành động này không thể hoàn tác.');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger w-100">
+                        <i class="bi bi-trash me-2"></i>Xóa User
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,30 @@
+@model FoodVault.Models.ViewModels.UserProfileSidebarViewModel
+
+<div class="card">
+    <div class="card-body text-center">
+        <img src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/favicon.ico" : Model.AvatarUrl)" class="rounded-circle mb-2" style="width:96px;height:96px;object-fit:cover;" alt="Avatar" />
+        <h5>@Model.Name</h5>
+        <p class="text-muted">@Model.Email</p>
+        <div>
+            <span class="badge bg-secondary">Recipes: @Model.NumRecipes</span>
+            <span class="badge bg-secondary">Favorites: @Model.NumFavorites</span>
+            <span class="badge bg-secondary">Fridges: @Model.NumFridges</span>
+        </div>
+        <a asp-controller="Profile" asp-action="Edit" class="btn btn-sm btn-outline-primary mt-2">Edit</a>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

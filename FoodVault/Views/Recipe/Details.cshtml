@@ -1,0 +1,151 @@
+@using System.Security.Claims;
+@model FoodVault.Models.ViewModels.RecipeDetailsViewModel
+@{
+    ViewData["Title"] = Model.Title;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">@Model.Title</h1>
+    <div class="d-flex gap-2">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <partial name="_FavoriteButton" model="new FoodVault.Models.ViewModels.FavoriteButtonViewModel { RecipeId = Model.Id, IsFavorited = Model.IsFavorited }" />
+        }
+    <a class="btn btn-outline-primary" asp-action="Print" asp-route-id="@Model.Id">🖨️ Print</a>
+    </div>
+</div>
+@if (!string.IsNullOrEmpty(Model.ImageUrl))
+{
+    <div class="mb-4 text-center">
+        <img src="@Model.ImageUrl" alt="@Model.Title" class="img-fluid rounded shadow" style="max-height:340px;object-fit:cover;" />
+    </div>
+}
+@if (!string.IsNullOrWhiteSpace(Model.Description))
+{
+    <div class="alert alert-info fs-5">
+        @Model.Description
+    </div>
+}
+<div class="row mb-3">
+    <div class="col-md-3"><strong>Số suất ăn:</strong> @Model.Servings</div>
+    <div class="col-md-3"><strong>Chuẩn bị:</strong> @Model.PrepTimeMinutes phút</div>
+    <div class="col-md-3"><strong>Nấu:</strong> @Model.CookTimeMinutes phút</div>
+    <div class="col-md-3"><strong>Người tạo:</strong> @Model.AuthorName</div>
+</div>
+@if (Model.TotalCalories != null)
+{
+    <div class="mb-3">
+        <h5>Bảng dinh dưỡng tổng</h5>
+        <table class="table table-bordered w-auto">
+            <tr><td><b>Kcal</b>:</td><td>@Model.TotalCalories</td><td><b>Protein</b>:</td><td>@Model.TotalProtein</td></tr>
+            <tr><td><b>Fat</b>:</td><td>@Model.TotalFat</td><td><b>Carbs</b>:</td><td>@Model.TotalCarbs</td></tr>
+        </table>
+    </div>
+}
+<h4>Nguyên liệu</h4>
+@if (Model.Ingredients != null && Model.Ingredients.Count > 0)
+{
+    <table class="table table-sm table-bordered w-auto mb-4">
+        <thead><tr><th>Tên nguyên liệu</th><th>Số lượng</th><th>Đơn vị</th><th>Kcal</th><th>Protein</th><th>Fat</th><th>Carb</th></tr></thead>
+        <tbody>
+        @foreach (var ingr in Model.Ingredients)
+        {
+            <tr>
+                <td>@ingr.IngredientName</td>
+                <td>@ingr.Quantity</td>
+                <td>@ingr.Unit</td>
+                <td>@ingr.Calories</td>
+                <td>@ingr.Protein</td>
+                <td>@ingr.Fat</td>
+                <td>@ingr.Carbs</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else {
+    <div class="text-muted mb-3">Không có nguyên liệu nào.</div>
+}
+<h4>Các bước thực hiện</h4>
+<ol class="list-group list-group-numbered mb-4">
+@foreach (var step in Model.Steps) {
+    <li class="list-group-item mb-2"><span class="fw-bold">Bước @step.StepNumber:</span> @step.Instruction</li>
+}
+</ol>
+<div class="row mb-2 text-muted">
+    <div class="col">Tạo lúc: @Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</div>
+    <div class="col">Cập nhật: @Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm")</div>
+    <div class="col">Favorites: @Model.FavoriteCount | Đánh giá trung bình: @(Model.AvgRating.HasValue ? Model.AvgRating.Value.ToString("F1") : "N/A")</div>
+</div>
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <hr class="my-4" />
+    <h4>Đánh giá và bình luận</h4>
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-controller="Rating" asp-action="Add" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="RecipeId" value="@Model.Id" />
+                <div class="mb-3">
+                    <label for="Rating" class="form-label">Đánh giá (1-5 sao)</label>
+                    <select name="Rating" id="Rating" class="form-select" required>
+                        <option value="">Chọn đánh giá</option>
+                        <option value="1">1 sao</option>
+                        <option value="2">2 sao</option>
+                        <option value="3">3 sao</option>
+                        <option value="4">4 sao</option>
+                        <option value="5">5 sao</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="Comment" class="form-label">Bình luận</label>
+                    <textarea name="Comment" id="Comment" class="form-control" rows="3" placeholder="Nhập bình luận của bạn..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+            </form>
+        </div>
+    </div>
+}
+
+<hr class="my-4" />
+<h4>Bình luận (@Model.Ratings.Count)</h4>
+@if (Model.Ratings != null && Model.Ratings.Any())
+{
+    <div class="list-group">
+        @foreach (var rating in Model.Ratings)
+        {
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-2">
+                            <strong class="me-2">@rating.UserName</strong>
+                            <partial name="_StarRating" model="new FoodVault.Models.ViewModels.StarRatingViewModel { Rating = rating.Rating }" />
+                            <small class="text-muted ms-2">@rating.RatedAt?.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(rating.Comment))
+                        {
+                            <p class="mb-0">@rating.Comment</p>
+                        }
+                    </div>
+                    @if (User.Identity?.IsAuthenticated == true && User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier) == rating.UserId)
+                    {
+                        <form asp-controller="Rating" asp-action="Delete" method="post" class="ms-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="ratingId" value="@rating.Id" />
+                            <input type="hidden" name="recipeId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info">Chưa có bình luận nào. Hãy là người đầu tiên đánh giá công thức này!</div>
+}
+
+<a asp-action="Index" class="btn btn-secondary mt-3">Quay lại danh sách</a>
+
+

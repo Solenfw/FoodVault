@@ -1,0 +1,46 @@
+@using Microsoft.AspNetCore.Identity
+@using FoodVault.Models.Entities
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+<ul class="navbar-nav ms-auto">
+	@if (SignInManager.IsSignedIn(User))
+	{
+		<li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+				@User.Identity?.Name
+			</a>
+			<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+				<li><a class="dropdown-item" asp-controller="Profile" asp-action="Index">Profile</a></li>
+				@if (User.IsInRole("Admin") || User.IsInRole("Moderator"))
+				{
+					<li><hr class="dropdown-divider"></li>
+					<li>
+						<a class="dropdown-item text-primary fw-bold" href="/admin/dashboard">
+							<i class="bi bi-shield-lock-fill"></i> Admin Panel
+						</a>
+					</li>
+				}
+				<li><hr class="dropdown-divider"></li>
+				<li>
+					<form class="px-3 py-1" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+						<button type="submit" class="btn btn-link dropdown-item">Logout</button>
+						
+					</form>
+				</li>
+			</ul>
+		</li>
+	}
+	else
+	{
+		<li class="nav-item">
+			<a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Login</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" asp-area="Identity" asp-page="/Account/Register">Register</a>
+		</li>
+	}
+</ul>
+
+
+

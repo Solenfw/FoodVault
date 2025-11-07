@@ -1,0 +1,20 @@
+/* Upload zone */
+.fv-upload {
+	border: 2px dashed var(--primary);
+	border-radius: 12px;
+	padding: 16px;
+	text-align: center;
+	color: var(--text);
+	background: var(--bg-2);
+	transition: background-color .2s, border-color .2s;
+}
+.fv-upload.dragover { background: rgba(0,0,0,0.05); border-color: var(--accent); }
+.fv-upload input[type="file"] { display: none; }
+.fv-upload .btn { margin-top: 8px; }
+
+.fv-previews { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 12px; margin-top: 12px; }
+.fv-thumb { position: relative; border-radius: 8px; overflow: hidden; background: var(--bg-2); box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+.fv-thumb img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 1/1; }
+.fv-thumb .fv-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(255,255,255,.4); }
+.fv-thumb .fv-progress i { display: block; height: 100%; width: 0%; background: var(--primary); transition: width .2s ease; }
+.fv-thumb .fv-remove { position: absolute; top: 6px; right: 6px; border: 0; border-radius: 50%; width: 28px; height: 28px; background: rgba(0,0,0,.4); color: #fff; }

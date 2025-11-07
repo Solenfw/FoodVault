@@ -1,0 +1,134 @@
+@model FoodVault.Areas.Admin.ViewModels.SettingsViewModel
+@{
+    ViewData["Title"] = "Cài đặt hệ thống";
+    Layout = "_AdminLayout";
+}
+
+<div class="content-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1>Cài đặt hệ thống</h1>
+            <p class="text-muted">Quản lý các cài đặt chung của hệ thống</p>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>
+    <strong>Lưu ý:</strong> Các cài đặt này hiện tại chỉ hiển thị. Để lưu cài đặt thực sự, bạn cần tích hợp với database hoặc configuration file.
+</div>
+
+<div class="row g-4">
+    <!-- Site Settings -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title m-0">
+                    <i class="bi bi-globe me-2"></i>Cài đặt Website
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Tên website</label>
+                    <input type="text" class="form-control" value="@Model.SiteName" disabled />
+                    <small class="text-muted">Tên hiển thị của website</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mô tả website</label>
+                    <textarea class="form-control" rows="3" disabled>@Model.SiteDescription</textarea>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" @(Model.MaintenanceMode == "true" ? "checked" : "") disabled />
+                    <label class="form-check-label">Chế độ bảo trì</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Upload Settings -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title m-0">
+                    <i class="bi bi-file-earmark-image me-2"></i>Cài đặt Upload
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Kích thước file tối đa</label>
+                    <input type="text" class="form-control" value="@Model.MaxFileSize" disabled />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Loại file được phép</label>
+                    <input type="text" class="form-control" value="@Model.AllowedFileTypes" disabled />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Settings -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title m-0">
+                    <i class="bi bi-envelope me-2"></i>Cài đặt Email
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" @(Model.EmailEnabled == "true" ? "checked" : "") disabled />
+                    <label class="form-check-label">Kích hoạt gửi email</label>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email Server</label>
+                    <input type="text" class="form-control" value="@Model.EmailServer" disabled />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Settings -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title m-0">
+                    <i class="bi bi-bell me-2"></i>Cài đặt Thông báo
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" @(Model.NotificationEnabled == "true" ? "checked" : "") disabled />
+                    <label class="form-check-label">Kích hoạt thông báo</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="card-title m-0">
+            <i class="bi bi-tools me-2"></i>Công cụ hệ thống
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <button class="btn btn-outline-primary w-100" disabled>
+                    <i class="bi bi-arrow-clockwise me-2"></i>Làm mới Cache
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-outline-info w-100" disabled>
+                    <i class="bi bi-database me-2"></i>Backup Database
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-outline-warning w-100" disabled>
+                    <i class="bi bi-graph-up me-2"></i>Xem Logs
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+

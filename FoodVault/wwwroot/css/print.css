@@ -1,0 +1,21 @@
+@media print {
+  @page { size: A4 portrait; margin: 2cm; }
+  html, body { background: #fff !important; color: #000 !important; font-family: Georgia, 'Times New Roman', serif; }
+  /* Hide chrome */
+  header, nav, .navbar, .footer, .comments, .btn, .no-print, #toastRegion { display: none !important; }
+  /* Containers full width */
+  .container, .container-fluid { width: 100% !important; max-width: none !important; padding: 0 !important; }
+  /* Images */
+  img { max-width: 100% !important; page-break-inside: avoid; }
+  /* Headings */
+  h1, h2, h3, h4 { color: #000 !important; }
+  /* Page breaks */
+  .page-break { page-break-before: always; }
+  .avoid-break { page-break-inside: avoid; }
+  /* Lists */
+  ul, ol { margin: 0 0 10px 20px; }
+  /* Links show URL */
+  a[href^="http"]:after { content: " (" attr(href) ")"; font-size: 10pt; }
+}
+
+

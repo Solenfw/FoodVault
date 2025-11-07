@@ -1,0 +1,143 @@
+@model List<FoodVault.Models.ViewModels.FridgeWithIngredientsViewModel>
+@{
+    ViewData["Title"] = "Tủ lạnh của tôi";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info">Bạn chưa có tủ lạnh nào. Hãy tạo mới một tủ lạnh!</div>
+    <form asp-action="CreateFridge" method="post" class="row row-cols-lg-auto align-items-center mb-4 mt-3">
+        <div class="col-6">
+            <input name="name" class="form-control form-control-sm" placeholder="Tên tủ lạnh (ví dụ: Nhà riêng, Văn phòng...)" required />
+        </div>
+        <div class="col">
+            <button class="btn btn-sm btn-primary" type="submit">Tạo tủ lạnh mới</button>
+        </div>
+    </form>
+}
+else
+{
+    foreach (var fridge in Model)
+    {
+        <div class="card my-3">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <strong>@fridge.Name</strong>
+                <form asp-action="DeleteFridge" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="fridgeId" value="@fridge.Id" />
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa tủ lạnh này? Tất cả nguyên liệu trong tủ lạnh sẽ bị xóa.')">
+                        🗑️ Xóa tủ lạnh
+                    </button>
+                </form>
+            </div>
+            <div class="card-body p-2">
+                @if (fridge.Ingredients.Count == 0)
+                {
+                    <div class="alert alert-warning m-2">Chưa có nguyên liệu trong tủ lạnh này.</div>
+                }
+                else
+                {
+                    <input type="text" class="form-control form-control-sm mb-2" placeholder="Tìm nguyên liệu..." onkeyup="filterIngredients(this, '@fridge.Id')" />
+                    <table class="table table-bordered table-sm mb-1" id="table-@fridge.Id">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Tên nguyên liệu</th>
+                            <th>Bao nhiêu</th>
+                            <th>Đơn vị</th>
+                            <th>HSD</th>
+                            <th>Kcal</th>
+                            <th>Protein</th>
+                            <th>Fat</th>
+                            <th>Carb</th>
+                            <th>Xóa</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var ingr in fridge.Ingredients)
+                        {
+
+                            bool hasDate = ingr.ExpirationDate != null;
+                            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                            bool isExpired = hasDate && ingr.ExpirationDate < today;
+                            bool isSoon = hasDate && !isExpired && ingr.ExpirationDate <= today.AddDays(3);
+                            <tr class="@(isExpired ? "table-danger" : isSoon ? "table-warning" : null)">
+
+                                <td>@ingr.IngredientName</td>
+                                <td>@ingr.Quantity</td>
+                                <td>@ingr.Unit</td>
+                                <td>
+                                    @if (ingr.ExpirationDate != null)
+                                    {
+                                        <span>@ingr.ExpirationDate.Value.ToString("dd/MM/yyyy")</span>
+                                        @if (isExpired)
+                                        {
+                                            <span class="badge bg-danger ms-2">Hết hạn!</span>
+                                        }
+                                        else if (isSoon)
+                                        {
+                                            <span class="badge bg-warning text-dark ms-2">Sắp hết hạn!</span>
+                                        }
+                                    } else {<span>-</span>}
+                                </td>
+                                <td>@Math.Round(ingr.Calories ?? 0, 1)</td>
+                                <td>@Math.Round(ingr.Protein ?? 0, 2)</td>
+                                <td>@Math.Round(ingr.Fat ?? 0, 2)</td>
+                                <td>@Math.Round(ingr.Carbs ?? 0, 2)</td>
+                                <td>
+                                    <form asp-action="RemoveItem" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="FridgeIngredientId" value="@ingr.Id" />
+                                        <button type="submit" class="btn btn-sm btn-link text-danger" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa nguyên liệu này không?')">
+                                            <i class="fa fa-trash-o"></i> 🗑
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+                <!-- Form thêm nguyên liệu mới -->
+                <form asp-action="AddItem" method="post" class="row row-cols-lg-auto align-items-center mt-3 g-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="FridgeId" value="@fridge.Id" />
+                    <div class="col-4">
+                        <input name="IngredientName" type="text" class="form-control form-control-sm" placeholder="Tên nguyên liệu (ví dụ: Thịt bò, Rau cải...)" required />
+                    </div>
+                    <div class="col-2">
+                        <input name="Quantity" type="number" step="any" class="form-control form-control-sm" placeholder="Số lượng" required />
+                    </div>
+                    <div class="col-2">
+                        <input name="Unit" class="form-control form-control-sm" placeholder="Đơn vị" />
+                    </div>
+                    <div class="col-2">
+                        <input name="DaysToExpire" type="number" min="1" class="form-control form-control-sm" placeholder="Số ngày dùng" />
+                    </div>
+                    <div class="col-3">
+                        <input name="ExpirationDate" type="date" class="form-control form-control-sm" placeholder="Hoặc chọn ngày hết hạn" />
+                    </div>
+                    <div class="col">
+                        <button class="btn btn-sm btn-success" type="submit">Thêm nguyên liệu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+}
+
+@section Scripts {
+<script>
+    function filterIngredients(input, fridgeId) {
+        var filter = input.value.toLowerCase();
+        var table = document.getElementById('table-' + fridgeId);
+        var trs = table.getElementsByTagName('tr');
+        for (var i = 1; i < trs.length; i++) {
+            var td = trs[i].getElementsByTagName('td')[0];
+            trs[i].style.display = td && td.textContent.toLowerCase().includes(filter) ? '' : 'none';
+        }
+    }
+</script>
+}
+

@@ -1,0 +1,147 @@
+@model FoodVault.Models.ViewModels.HomeViewModel
+@{
+	ViewData["Title"] = "Home";
+}
+@{
+	var theme = ViewData["UserTheme"] as string;
+}
+@if (!string.IsNullOrEmpty(theme))
+{
+	<meta name="user-theme" content="@theme" />
+}
+<section class="py-4 text-center">
+    	<div class="container">
+		<h1 class="display-5 fw-bold">Welcome to FoodVault</h1>
+		<p class="lead text-muted">Discover recipes, track your fridge, and save your favorites.</p>
+    	<a class="btn btn-primary btn-lg" asp-controller="Recipe" asp-action="Index">Explore Recipes</a>
+	</div>
+</section>
+
+<section class="pb-3">
+	<div class="container">
+		<h2 class="h4 mb-3">Popular Tags</h2>
+		@if (Model.PopularTags != null && Model.PopularTags.Any())
+		{
+			<div class="owl-carousel owl-theme" id="popularTagsCarousel">
+				@foreach (var tag in Model.PopularTags)
+				{
+					<div class="item">
+						<a class="badge rounded-pill text-bg-light text-decoration-none p-2 d-inline-block" asp-controller="Search" asp-action="ByTag" asp-route-id="@tag.Id" style="min-width: 120px; text-align: center;">
+							<span class="me-1">#@tag.Name</span>
+							<span class="text-muted">(@tag.Count)</span>
+						</a>
+					</div>
+				}
+			</div>
+		}
+		else
+		{
+			<div class="alert alert-info">Chưa có tag phổ biến. Hãy thêm thẻ cho công thức của bạn.</div>
+		}
+	</div>
+</section>
+
+<section class="pb-4">
+	<div class="container">
+		<h2 class="h4 mb-3">Top Favorites</h2>
+		@if (Model.TopFavorites != null && Model.TopFavorites.Any())
+		{
+			<div class="owl-carousel owl-theme" id="topFavoritesCarousel">
+				@foreach (var r in Model.TopFavorites)
+				{
+					<div class="item">
+						@await Component.InvokeAsync("RecipeCard", new RecipeCardViewModel
+						{ Id = r.Id, Title = r.Title, Description = r.Description, ImageUrl = r.ImageUrl, PrepTimeMinutes = r.PrepTimeMinutes, CookTimeMinutes = r.CookTimeMinutes, Servings = r.Servings, Rating = r.Rating, IsFavorited = false })
+					</div>
+				}
+			</div>
+		}
+		else
+		{
+			<div class="alert alert-info">Chưa có lượt yêu thích. Hãy thử nhấn ❤️ để thêm vào yêu thích.</div>
+		}
+	</div>
+</section>
+
+<section class="pb-5">
+	<div class="container">
+		<h2 class="h4 mb-3">Recent Recipes</h2>
+		@if (Model.RecentRecipes != null && Model.RecentRecipes.Any())
+		{
+		<div class="owl-carousel owl-theme" id="recentRecipesCarousel">
+			@foreach (var r in Model.RecentRecipes)
+			{
+				<div class="item">
+						@await Component.InvokeAsync("RecipeCard", new RecipeCardViewModel
+						{ Id = r.Id, Title = r.Title, Description = r.Description, ImageUrl = r.ImageUrl, PrepTimeMinutes = r.PrepTimeMinutes, CookTimeMinutes = r.CookTimeMinutes, Servings = r.Servings, Rating = r.Rating, IsFavorited = false })
+				</div>
+			}
+		</div>
+		}
+		else
+		{
+			<div class="alert alert-info">Chưa có công thức gần đây.</div>
+		}
+	</div>
+</section>
+
+@section Scripts {
+    <script src="~/js/owl.carousel.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize Popular Tags Carousel
+            var tagsCarousel = $("#popularTagsCarousel");
+            if (tagsCarousel.length && tagsCarousel.children().length > 0) {
+                tagsCarousel.owlCarousel({
+                    items: 6,
+                    margin: 10,
+                    loop: tagsCarousel.children().length > 6,
+                    nav: tagsCarousel.children().length > 6,
+                    dots: false,
+                    autoplay: false,
+                    responsive: {
+                        0: {items: 2},
+                        576: {items: 3},
+                        768: {items: 4},
+                        992: {items: 5},
+                        1200: {items: 6}
+                    }
+                });
+            }
+            
+            // Initialize Top Favorites Carousel
+            var favoritesCarousel = $("#topFavoritesCarousel");
+            if (favoritesCarousel.length && favoritesCarousel.children().length > 0) {
+                favoritesCarousel.owlCarousel({
+                    items: 3,
+                    margin: 16,
+                    loop: favoritesCarousel.children().length > 3,
+                    nav: favoritesCarousel.children().length > 3,
+                    dots: true,
+                    responsive: {
+                        0: {items: 1},
+                        600: {items: 2},
+                        1000: {items: 3}
+                    }
+                });
+            }
+            
+            // Initialize Recent Recipes Carousel
+            var recentCarousel = $("#recentRecipesCarousel");
+            if (recentCarousel.length && recentCarousel.children().length > 0) {
+                recentCarousel.owlCarousel({
+                    items: 3,
+                    margin: 16,
+                    loop: recentCarousel.children().length > 3,
+                    nav: recentCarousel.children().length > 3,
+                    dots: true,
+                    responsive: {
+                        0: {items: 1},
+                        600: {items: 2},
+                        1000: {items: 3}
+                    }
+                });
+            }
+        });
+    </script>
+}
