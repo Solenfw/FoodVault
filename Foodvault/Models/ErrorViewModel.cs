@@ -1,4 +1,4 @@
-namespace Foodvault.Models
+namespace FoodVault.Models
 {
     public class ErrorViewModel
     {
