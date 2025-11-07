@@ -1,0 +1,15 @@
+# Visual Studio generated files
+*.suo
+*.user
+*.sln.docstates
+
+# User-specific files
+.vs/
+
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# Other files
+*.csproj.user
+*.cache
