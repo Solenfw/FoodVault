@@ -27,6 +27,15 @@ builder.Services.AddDefaultIdentity<FoodVault.Models.Entities.User>(options => o
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<FoodVault.Models.Data.FoodVaultDbContext>();
 
+// Add Google external authentication
+builder.Services.AddAuthentication()
+.AddGoogle(options =>
+{
+    IConfigurationSection googleAuthSection = builder.Configuration.GetSection("Authentication:Google");
+    options.ClientId = googleAuthSection["ClientId"];
+    options.ClientSecret = googleAuthSection["ClientSecret"];
+});
+
 // Configure application cookie authentication
 builder.Services.ConfigureApplicationCookie(options =>
 {
